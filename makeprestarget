@@ -1,0 +1,111 @@
+#!/bin/bash
+# makeprestarget, makes a file according to the video preservation master specifications listed at http://calpreservation.org/wp-content/uploads/2013/10/CAVPPTargetAudioandVideo-Specs2013_IMLS.pdf as of March 10, 2014
+version="1.0"
+scriptdir=$(dirname $(which "$0"))
+. "$scriptdir/mmfunctions" || { echo "Missing '$scriptdir/mmfunctions'. Exiting." ; exit 1 ;};
+dependencies=(ffmpeg ffprobe)
+extension="_makeprestarget"
+_initialize_make
+
+usage(){
+    echo
+    echo "$(basename ${0}) ${version}"
+    echo "This application will create a prores/quicktime file (suitable for editing) from a video file or package input with the following options. By default the output will be written to ${outputdir}. You can override this with the -o option."
+    echo "Dependencies: ${dependencies[@]}"
+    echo "Usage: $(basename $0) [ -o /directory/to/write/to/ ] fileorpackage1 [ fileorpackage2 ...]"
+    echo "  -d directory ( directory to deliver the resulting file to )"
+    echo "  -o directory ( directory to write the resulting file to )"
+    echo "  -n (dry-run mode, show the commands that would be run but don't do anything)"
+    echo "  -e emailaddress ( send an email about the delivery, only valid if -d is used )"
+    echo "  -E emailaddress ( send an email about process outcome )"
+    echo "  -h ( display this help )"
+    echo
+    exit
+}
+[ "${#}" = 0 ] && usage
+
+# command-line options to set mediaid and original variables
+OPTIND=1
+while getopts ":po:d:e:E:nh" opt ; do
+    case "${opt}" in
+        p) prores="Y" ;;
+        o) outputdir_forced="$OPTARG" && _check_outputdir_forced ;;
+        d) deliverdir="$OPTARG" && check_deliverdir ;;
+        e) emailaddress_delivery="$OPTARG" && check_emailaddress "${emailaddress_delivery}" ;;
+        E) emailaddress_outcome="$OPTARG" && check_emailaddress "${emailaddress_outcome}" ;;
+        n) DRYRUN=true;;
+        h) usage ;;
+        *) echo "bad option -$OPTARG" ; usage ;;
+        :) echo "Option -$OPTARG requires an argument" ; exit 1 ;;
+    esac
+done
+shift $(( ${OPTIND} - 1 ))
+
+while [ "${*}" != "" ] ; do
+    input="$1"
+    if [[ ! "${outputdir}" ]] ; then
+        outputdir="$(dirname "$input")/$(basename $0)" # default output directory, override with -o
+    fi
+    # get context about the input
+    if [ -z "${outputdir_forced}" ] ; then
+        [ -d "${input}" ] && { outputdir="${input}/objects/access/$(basename $0)" && logdir="${input}/metadata/submissionDocumentation/logs" ;};
+        [ -f "${input}" ] && { outputdir=$(dirname "${input}")"/access/$(basename $0)" && logdir="$(dirname "${input}")/access/logs" ;};
+        [ ! "${outputdir}" ] && { outputdir="${input}/objects/access/$(basename $0)" && logdir="${input}/metadata/submissionDocumentation/logs" ;};
+    else
+        outputdir="${outputdir_forced}"
+        logdir="${outputdir}/logs"
+    fi
+    _find_input "${input}"
+    mediaid=$(basename "${input}" | cut -d. -f1)
+
+    # set up output
+    _log -b
+    if [[ "${prores}" == "Y" ]] ; then
+        extension="${extension}_prores"
+    fi
+    output="${outputdir}/${mediaid%.*}${extension}.mov"
+    [ -s "${output}" ] && { report -wt "WARNING ${output} already exists, skipping transcode" ; shift ; continue ;};
+    _run mkdir -p "${outputdir}"
+
+    # clear local arrays
+    unset inputoptions
+    unset middleoptions
+    
+    get_videocodecname "${input}"
+    get_videostreamcount "${input}"
+    get_audiostreamcount "${input}"
+
+    # encoding options
+    if [[ "${VIDEOCODECNAME}" == "bmp" || "${VIDEOCODECNAME}" == "dpx" ]] ; then
+        inputoptions+=(-f image2)
+        inputoptions+=(-r:v 24)                 # force interpretation of input images to 24 fps
+        start_number=$(basename $sourcefile | grep -o '[0-9]\{6\}')
+        inputoptions+=(-start_number "${start_number}")
+        sourcefile=$(echo "$sourcefile" | sed "s/${start_number}/%06d/")
+    fi
+    if [[ "${VIDEOSTREAMCOUNT}" > 0 ]] ; then
+        middleoptions+=(-map 0:v)               # process all video streams of the input
+        if [[ "${prores}" == "Y" ]] ; then
+            middleoptions+=(-c:v prores)        # force video codec to prores (10 bit 4:2:2)
+        else
+            middleoptions+=(-c:v v210)          # force video codec to v210 (10 bit 4:2:2 uncompressed)
+        fi
+        middleoptions+=(-r:v ntsc)              # force NSTC frame rate
+        middleoptions+=(-vf 'scale=720:486:interl=1,setdar=4/3')  # scale to 720x486 with interlace awareness and set display aspect ratio to 4/3
+    fi
+    if [[ "${AUDIOSTREAMCOUNT}" > 0 ]] ; then
+        middleoptions+=(-map 0:a)               # process all audio streams of the input
+        middleoptions+=(-c:a pcm_s24le)         # force audio codec to pcm_s24le (uncompressed signed, 24 bit little endian, audio samples)
+        middleoptions+=(-ac 2)                  # force audio to 2 channel configuration
+        middleoptions+=(-ar 48k)                # force audio to 48kHz sampling rate
+    fi
+    middleoptions+=(-f mov)                     # force quicktime format
+
+    _prep_ffmpeg_log
+    _run ffmpeg ${inputoptions[@]} -i "${sourcefile}" ${middleoptions[@]} "${output}"
+    echo
+    _summarize_make
+    _deliver_output
+    shift
+    _log -e
+done
