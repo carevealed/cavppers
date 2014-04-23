@@ -49,9 +49,9 @@ while [ "${*}" != "" ] ; do
     fi
     # get context about the input
     if [ -z "${outputdir_forced}" ] ; then
-        [ -d "${input}" ] && { outputdir="${input}/objects/access/$(basename $0)" && logdir="${input}/metadata/submissionDocumentation/logs" ;};
-        [ -f "${input}" ] && { outputdir=$(dirname "${input}")"/access/$(basename $0)" && logdir="$(dirname "${input}")/access/logs" ;};
-        [ ! "${outputdir}" ] && { outputdir="${input}/objects/access/$(basename $0)" && logdir="${input}/metadata/submissionDocumentation/logs" ;};
+        [ -d "${input}" ] && { outputdir="${input}/transcoded" && logdir="${input}/logs" ;};
+        [ -f "${input}" ] && { outputdir=$(dirname "${input}")"/transcoded" && logdir="$(dirname "${input}")/logs" ;};
+        [ ! "${outputdir}" ] && { outputdir="${input}/transcoded" && logdir="${input}/logs" ;};
     else
         outputdir="${outputdir_forced}"
         logdir="${outputdir}/logs"
