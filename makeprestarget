@@ -4,6 +4,7 @@ version="1.0"
 scriptdir=$(dirname $(which "$0"))
 . "$scriptdir/mmfunctions" || { echo "Missing '$scriptdir/mmfunctions'. Exiting." ; exit 1 ;};
 dependencies=(ffmpeg ffprobe)
+default_input_framerate=18
 extension="_prsv"
 _initialize_make
 
@@ -14,6 +15,7 @@ usage(){
     echo "Dependencies: ${dependencies[@]}"
     echo "Usage: $(basename $0) [ -o /directory/to/write/to/ ] fileorpackage1 [ fileorpackage2 ...]"
     echo "  -p ( use prores for the output video codec instead of defaults )"
+    echo "  -r framerate ( specify a framerate to interpret to input, used only for dpx and bmp image sequences. If not declared the script will use $default_input_framerate fps as a default )"
     echo "  -d directory ( directory to deliver the resulting file to )"
     echo "  -o directory ( directory to write the resulting file to )"
     echo "  -n (dry-run mode, show the commands that would be run but don't do anything)"
@@ -27,9 +29,10 @@ usage(){
 
 # command-line options to set mediaid and original variables
 OPTIND=1
-while getopts ":po:d:e:E:nh" opt ; do
+while getopts ":pr:o:d:e:E:nh" opt ; do
     case "${opt}" in
         p) prores="Y" ;;
+        r) inputframerate="$OPTARG" ;;
         o) outputdir_forced="$OPTARG" && _check_outputdir_forced ;;
         d) deliverdir="$OPTARG" && check_deliverdir ;;
         e) emailaddress_delivery="$OPTARG" && check_emailaddress "${emailaddress_delivery}" ;;
@@ -79,7 +82,11 @@ while [ "${*}" != "" ] ; do
     # encoding options
     if [[ "${VIDEOCODECNAME}" == "bmp" || "${VIDEOCODECNAME}" == "dpx" ]] ; then
         inputoptions+=(-f image2)
-        inputoptions+=(-r:v 24)                 # force interpretation of input images to 24 fps
+        if [[ "${inputframerate}" ]] ; then
+            inputoptions+=(-r:v "${inputframerate}")
+        else
+            inputoptions+=(-r:v 18)             # otherwise set to a default input frame rate
+        fi
         start_number=$(basename "$sourcefile" | grep -o '[0-9]\{6\}')
         inputoptions+=(-start_number "${start_number}")
         sourcefile=$(echo "$sourcefile" | sed "s/${start_number}/%06d/")
