@@ -1,6 +1,7 @@
 #!/bin/bash
 # makeprestarget, makes a file according to the video preservation master specifications listed at http://calpreservation.org/wp-content/uploads/2013/10/CAVPPTargetAudioandVideo-Specs2013_IMLS.pdf as of March 10, 2014
 version="1.0"
+scriptname=$(basename $(which "$0"))
 scriptdir=$(dirname $(which "$0"))
 . "$scriptdir/mmfunctions" || { echo "Missing '$scriptdir/mmfunctions'. Exiting." ; exit 1 ;};
 dependencies=(ffmpeg ffprobe)
@@ -22,6 +23,13 @@ usage(){
     echo "  -e emailaddress ( send an email about the delivery, only valid if -d is used )"
     echo "  -E emailaddress ( send an email about process outcome )"
     echo "  -h ( display this help )"
+    echo
+    echo "  Examples:"
+    echo "  To read a series of BMP files as 24 frames per second and convert to default settings"
+    echo "      ${scriptname} -r 24 100001.BMP"
+    echo
+    echo "  To transcode a batch of files to the default settings but use the prores video codec"
+    echo "      ${scriptname} -p firstfile.avi secondfile.mov thirdfile.mkv"
     echo
     exit
 }
