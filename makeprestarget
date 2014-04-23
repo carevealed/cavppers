@@ -80,7 +80,7 @@ while [ "${*}" != "" ] ; do
     if [[ "${VIDEOCODECNAME}" == "bmp" || "${VIDEOCODECNAME}" == "dpx" ]] ; then
         inputoptions+=(-f image2)
         inputoptions+=(-r:v 24)                 # force interpretation of input images to 24 fps
-        start_number=$(basename $sourcefile | grep -o '[0-9]\{6\}')
+        start_number=$(basename "$sourcefile" | grep -o '[0-9]\{6\}')
         inputoptions+=(-start_number "${start_number}")
         sourcefile=$(echo "$sourcefile" | sed "s/${start_number}/%06d/")
     fi
