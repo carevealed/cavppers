@@ -13,6 +13,7 @@ usage(){
     echo "This application will create a prores/quicktime file (suitable for editing) from a video file or package input with the following options. By default the output will be written to ${outputdir}. You can override this with the -o option."
     echo "Dependencies: ${dependencies[@]}"
     echo "Usage: $(basename $0) [ -o /directory/to/write/to/ ] fileorpackage1 [ fileorpackage2 ...]"
+    echo "  -p ( use prores for the output video codec instead of defaults )"
     echo "  -d directory ( directory to deliver the resulting file to )"
     echo "  -o directory ( directory to write the resulting file to )"
     echo "  -n (dry-run mode, show the commands that would be run but don't do anything)"
