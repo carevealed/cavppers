@@ -16,6 +16,7 @@ usage(){
     echo "Dependencies: ${dependencies[@]}"
     echo "Usage: $(basename $0) [ -o /directory/to/write/to/ ] fileorpackage1 [ fileorpackage2 ...]"
     echo "  -p ( use prores for the output video codec instead of defaults )"
+    echo "  -c ( crop out the center 960x720 of the input video, this is intended to process certain film scans )"
     echo "  -r framerate ( specify a framerate to interpret to input, used only for dpx and bmp image sequences. If not declared the script will use $default_input_framerate fps as a default )"
     echo "  -d directory ( directory to deliver the resulting file to )"
     echo "  -o directory ( directory to write the resulting file to )"
@@ -37,9 +38,10 @@ usage(){
 
 # command-line options to set mediaid and original variables
 OPTIND=1
-while getopts ":pr:o:d:e:E:nh" opt ; do
+while getopts ":pcr:o:d:e:E:nh" opt ; do
     case "${opt}" in
         p) prores="Y" ;;
+        c) crop="Y" ;;
         r) inputframerate="$OPTARG" ;;
         o) outputdir_forced="$OPTARG" && _check_outputdir_forced ;;
         d) deliverdir="$OPTARG" && check_deliverdir ;;
@@ -75,6 +77,12 @@ while [ "${*}" != "" ] ; do
     if [[ "${prores}" == "Y" ]] ; then
         extension="${extension}_prores"
     fi
+    if [[ "${crop}" == "Y" ]] ; then
+        croppingprocess="crop=960:720,"
+        extension="${extension}_cropped"
+    else
+        croppingprocess=""
+    fi
     output="${outputdir}/${mediaid%.*}${extension}.mov"
     [ -s "${output}" ] && { report -wt "WARNING ${output} already exists, skipping transcode" ; shift ; continue ;};
     _run mkdir -p "${outputdir}"
@@ -107,7 +115,7 @@ while [ "${*}" != "" ] ; do
             middleoptions+=(-c:v v210)          # force video codec to v210 (10 bit 4:2:2 uncompressed)
         fi
         middleoptions+=(-r:v ntsc)              # force NSTC frame rate
-        middleoptions+=(-vf 'scale=720:486:interl=1,setdar=4/3')  # scale to 720x486 with interlace awareness and set display aspect ratio to 4/3
+        middleoptions+=(-vf "${croppingprocess}scale=720:486:interl=1,setdar=4/3")  # scale to 720x486 with interlace awareness and set display aspect ratio to 4/3
     fi
     if [[ "${AUDIOSTREAMCOUNT}" > 0 ]] ; then
         middleoptions+=(-map 0:a)               # process all audio streams of the input
