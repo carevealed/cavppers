@@ -1,0 +1,121 @@
+#!/bin/bash
+# verifymedia, makes a file according to the video preservation master specifications listed at http://calpreservation.org/wp-content/uploads/2013/10/CAVPPTargetAudioandVideo-Specs2013_IMLS.pdf as of March 10, 2014
+version="1.0"
+scriptname=$(basename $(which "$0"))
+scriptdir=$(dirname $(which "$0"))
+. "$scriptdir/mmfunctions" || { echo "Missing '$scriptdir/mmfunctions'. Exiting." ; exit 1 ;};
+dependencies=(ffmpeg ffprobe)
+_initialize_make
+
+specset=p
+
+usage(){
+    echo
+    echo "$(basename ${0}) ${version}"
+    echo ""
+    echo "Dependencies: ${dependencies[@]}"
+    echo "Usage: $(basename $0) [ -h ] [ -s a/p ] file1 [ file2 ...]"
+    echo "  -s ( set a specification set, either 'a' for access file or 'p' for preservation file, default is 'p' )"
+    echo "  -h ( display this help )"
+    echo
+    exit
+}
+[ "${#}" = 0 ] && usage
+
+_makeffprobe(){
+    ffprobetmp=$(maketemp)
+    ffprobe -v 0 "$1" -show_format -show_streams -of flat > "${ffprobetmp}"
+    videoids=$(grep "streams.stream.*.codec_type=\"video\"" "${ffprobetmp}" | cut -d. -f3)
+    audioids=$(grep "streams.stream.*.codec_type=\"audio\"" "${ffprobetmp}" | cut -d. -f3)
+}
+
+_check(){
+    key="${1}"
+    operator="${2}"
+    value="${3}"
+    actualvalue=$(grep "${key}" "${ffprobetmp}" | cut -d= -f2 | sed 's/^"//g' | sed 's/"$//g' )
+    if [[ "${operator}" == "equals" ]] ; then
+        if [[ "${value}" == "${actualvalue}" ]] ; then
+            if [[ "${verbose}" == "Y" ]] ; then
+                report -d "VALID: ${key}:${actualvalue} ${operator} ${value}"
+            fi
+        else
+            report -w "INVALID: ${key}:${actualvalue} does not ${operator} ${value}"
+        fi
+    elif [[ "${operator}" == "contains" ]] ; then
+        if [[ "${value}" != "${actualvalue/$value/}" ]] ; then
+            if [[ "${verbose}" == "Y" ]] ; then
+                report -d "VALID: ${key}:${actualvalue} ${operator} ${value}"
+            fi
+        else
+            report -w "INVALID: ${key}:${actualvalue} does not ${operator} ${value}"
+        fi
+    else
+        report -w "ERROR: unknown operator, ${operator}"
+        exit
+    fi
+}
+
+# command-line options
+OPTIND=1
+while getopts "s:vh" opt ; do
+    case "${opt}" in
+        s) specset="${OPTARG}" ;;
+        v) verbose="Y" ;;
+        h) usage ;;
+        *) echo "bad option -$OPTARG" ; usage ;;
+        :) echo "Option -$OPTARG requires an argument" ; exit 1 ;;
+    esac
+done
+shift $(( ${OPTIND} - 1 ))
+
+while [ "${*}" != "" ] ; do
+    input="$1"
+    report -dt "Testing ${input}"
+    _makeffprobe "${input}"
+    if [[ "${specset}" = "p" ]] ; then
+        # Preservation media file checks
+        # format checks
+        _check "format.filename" contains ".mov"
+        _check "format.format_long_name" equals "QuickTime / MOV"
+        # stream checks
+        for videoid in $(echo "${videoids}") ; do
+            _check "streams.stream.${videoid}.codec_tag_string"     equals "v210"
+            _check "streams.stream.${videoid}.pix_fmt"              equals "yuv422p10le"
+            _check "streams.stream.${videoid}.width"                equals "720"
+            _check "streams.stream.${videoid}.height"               equals "486"
+            _check "streams.stream.${videoid}.r_frame_rate"         equals "30000/1001"
+            _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
+        done
+        for audioid in $(echo "${audioids}") ; do
+            _check "streams.stream.${audioid}.codec_name"      contains "pcm"
+            _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
+            _check "streams.stream.${audioid}.channels"        equals   "2"
+            _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
+        done
+    elif [[ "${specset}" = "a" ]] ; then
+        # Access media file checks
+        # format checks
+        _check "format.filename" contains ".mp4"
+        _check "format.format_long_name" equals "QuickTime / MOV"
+        # stream checks
+        for videoid in $(echo "${videoids}") ; do
+            _check "streams.stream.${videoid}.codec_tag_string"     equals "avc1"
+            _check "streams.stream.${videoid}.pix_fmt"              equals "yuv420p"
+            _check "streams.stream.${videoid}.width"                equals "720"
+            _check "streams.stream.${videoid}.height"               equals "540"
+            _check "streams.stream.${videoid}.r_frame_rate"         equals "30000/1001"
+            _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
+            _check "streams.stream.${videoid}.bit_rate" equals "1500000"
+        done
+        for audioid in $(echo "${audioids}") ; do
+            _check "streams.stream.${audioid}.codec_name"      contains "aac"
+            _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
+            _check "streams.stream.${audioid}.channels"        equals   "2"
+            _check "streams.stream.${audioid}.bit_rate"        equals   "160000"
+        done
+    fi
+    rm "${ffprobetmp}"
+    shift
+    _log -e
+done
