@@ -3,7 +3,7 @@
 version="1.0"
 scriptname=$(basename $(which "$0"))
 scriptdir=$(dirname $(which "$0"))
-. "$scriptdir/mmfunctions" || { echo "Missing '$scriptdir/mmfunctions'. Exiting." ; exit 1 ;};
+. "$scriptdir/cavpperfunctions" || { echo "Missing '$scriptdir/cavpperfunctions'. Exiting." ; exit 1 ;};
 dependencies=(ffmpeg ffprobe)
 default_input_framerate=18
 extension="_prsv"
