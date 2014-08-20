@@ -114,6 +114,29 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bit_rate"        equals   "160000"
         done
+    elif [[ "${specset}" = "w" ]] ; then
+        # Access media file checks
+        # format checks
+        _check "format.filename" contains ".wav"
+        _check "format.format_name" equals "wav"
+        # stream checks
+        for audioid in $(echo "${audioids}") ; do
+            _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
+            _check "streams.stream.${audioid}.sample_rate"     equals   "96000"
+            _check "streams.stream.${audioid}.channels"        equals   "2"
+            _check "streams.stream.${audioid}.bit_rate"        equals   "4608000"
+        done
+    elif [[ "${specset}" = "W" ]] ; then
+        # Access media file checks
+        # format checks
+        _check "format.filename" contains ".mp3"
+        _check "format.format_name" equals "mp3"
+        # stream checks
+        for audioid in $(echo "${audioids}") ; do
+            _check "streams.stream.${audioid}.channel_layout"  equals   "stereo"
+            _check "streams.stream.${audioid}.channels"        equals   "2"
+            _check "streams.stream.${audioid}.bit_rate"        equals   "320000"
+        done
     fi
     rm "${ffprobetmp}"
     shift
