@@ -15,7 +15,7 @@ usage(){
     echo ""
     echo "Dependencies: ${dependencies[@]}"
     echo "Usage: $(basename $0) [ -h ] [ -s a/p ] file1 [ file2 ...]"
-    echo "  -s ( set a specification set, either 'a' for access file or 'p' for preservation file, default is 'p' )"
+    echo "  -s ( set a specification set, either 'va' for video access file, 'vp' for video preservation file, 'aa' for audio access file, 'ap' for audio preservation file, default is 'vp' )"
     echo "  -h ( display this help )"
     echo
     exit
@@ -73,7 +73,7 @@ while [ "${*}" != "" ] ; do
     input="$1"
     report -dt "Testing ${input}"
     _makeffprobe "${input}"
-    if [[ "${specset}" = "p" ]] ; then
+    if [[ "${specset}" = "vp" ]] ; then
         # Preservation media file checks
         # format checks
         _check "format.filename" contains ".mov"
@@ -93,7 +93,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
         done
-    elif [[ "${specset}" = "a" ]] ; then
+    elif [[ "${specset}" = "va" ]] ; then
         # Access media file checks
         # format checks
         _check "format.filename" contains ".mp4"
@@ -114,7 +114,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bit_rate"        equals   "160000"
         done
-    elif [[ "${specset}" = "w" ]] ; then
+    elif [[ "${specset}" = "ap" ]] ; then
         # Access media file checks
         # format checks
         _check "format.filename" contains ".wav"
@@ -126,7 +126,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bit_rate"        equals   "4608000"
         done
-    elif [[ "${specset}" = "W" ]] ; then
+    elif [[ "${specset}" = "aa" ]] ; then
         # Access media file checks
         # format checks
         _check "format.filename" contains ".mp3"
