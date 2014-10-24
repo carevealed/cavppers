@@ -1,0 +1,109 @@
+#!/bin/bash
+# makeaccesstarget
+version="1.0"
+set -e
+
+scriptname=$(basename $(which "$0"))
+scriptdir=$(dirname $(which "$0"))
+. "$scriptdir/cavpperfunctions" || { echo "Missing '$scriptdir/cavpperfunctions'. Exiting." ; exit 1 ;};
+dependencies=(ffmpeg ffprobe)
+extension="_access"
+_initialize_make
+
+usage(){
+    echo
+    echo "$(basename ${0}) ${version}"
+    echo "This application will create an h264 access file from a video file or package input with the following options. By default the output will be written to ${outputdir}. You can override this with the -o option."
+    echo "Dependencies: ${dependencies[@]}"
+    echo "Usage: $(basename $0) [ -o /directory/to/write/to/ ] fileorpackage1 [ fileorpackage2 ...]"
+    echo "  -c ( crop out the center 960x720 of the input video, this is intended to process certain film scans )"
+    echo "  -d directory ( directory to deliver the resulting file to )"
+    echo "  -o directory ( directory to write the resulting file to )"
+    echo "  -n (dry-run mode, show the commands that would be run but don't do anything)"
+    echo "  -e emailaddress ( send an email about the delivery, only valid if -d is used )"
+    echo "  -E emailaddress ( send an email about process outcome )"
+    echo "  -h ( display this help )"
+    echo
+    exit
+}
+[ "${#}" = 0 ] && usage
+
+# command-line options to set mediaid and original variables
+OPTIND=1
+while getopts ":pcr:o:d:e:E:nh" opt ; do
+    case "${opt}" in
+        c) crop="Y" ;;
+        o) outputdir_forced="$OPTARG" && _check_outputdir_forced ;;
+        d) deliverdir="$OPTARG" && check_deliverdir ;;
+        e) emailaddress_delivery="$OPTARG" && check_emailaddress "${emailaddress_delivery}" ;;
+        E) emailaddress_outcome="$OPTARG" && check_emailaddress "${emailaddress_outcome}" ;;
+        n) DRYRUN=true;;
+        h) usage ;;
+        *) echo "bad option -$OPTARG" ; usage ;;
+        :) echo "Option -$OPTARG requires an argument" ; exit 1 ;;
+    esac
+done
+shift $(( ${OPTIND} - 1 ))
+
+while [ "${*}" != "" ] ; do
+    input="$1"
+    if [[ ! "${outputdir}" ]] ; then
+        outputdir="$(dirname "$input")/$(basename $0)" # default output directory, override with -o
+    fi
+    # get context about the input
+    if [ -z "${outputdir_forced}" ] ; then
+        [ -d "${input}" ] && { outputdir="${input}/transcoded" && logdir="${input}/logs" ;};
+        [ -f "${input}" ] && { outputdir=$(dirname "${input}")"/transcoded" && logdir="$(dirname "${input}")/logs" ;};
+        [ ! "${outputdir}" ] && { outputdir="${input}/transcoded" && logdir="${input}/logs" ;};
+    else
+        outputdir="${outputdir_forced}"
+        logdir="${outputdir}/logs"
+    fi
+    _find_input "${input}"
+    mediaid=$(basename "${input}" | cut -d. -f1)
+
+    # set up output
+    _log -b
+    if [[ "${crop}" == "Y" ]] ; then
+        croppingprocess="crop=960:720,"
+        extension="${extension}_cropped"
+    else
+        croppingprocess=""
+    fi
+    output="${outputdir}/${mediaid%.*}${extension}.mov"
+    [ -s "${output}" ] && { report -wt "WARNING ${output} already exists, skipping transcode" ; shift ; continue ;};
+    _run mkdir -p "${outputdir}"
+
+    # clear local arrays
+    unset inputoptions
+    unset middleoptions
+    
+    get_videocodecname "${input}"
+    get_videostreamcount "${input}"
+    get_audiostreamcount "${input}"
+
+    if [[ "${VIDEOSTREAMCOUNT}" > 0 ]] ; then
+        middleoptions+=(-map 0:v)               # process all video streams of the input
+        middleoptions+=(-b:v 3.5M)              # stream bitrate fixed at 3.5mbps
+        middleoptions+=(-c:v libx264)           # force video codec to libx264
+        middleoptions+=(-r ntsc)                # force NSTC frame rate
+        middleoptions+=(-aspect 4/3)            # force aspect ratio to 4:3
+        middleoptions+=(-vf yadif,scale=720:540,setdar=4/3)  # scale to 720x540 with interlace awareness and set display aspect ratio to 4/3
+        middleoptions+=(-pix_fmt yuv420p)       # force colorspace to YUV
+    fi
+    if [[ "${AUDIOSTREAMCOUNT}" > 0 ]] ; then
+        middleoptions+=(-map 0:a)               # process all audio streams of the input
+        middleoptions+=(-c:a libfaac)           # force audio codec to AAC
+        middleoptions+=(-b:a 160k)              # force audio to 160 Kbps stream bitrate
+        middleoptions+=(-ac 2)                  # force audio to 2 Channels
+        middleoptions+=(-r:a 48k)               # force audio to 48kHz sampling rate
+    fi
+    middleoptions+=(-f mp4)                     # force mp4 format
+    _prep_ffmpeg_log
+    _run ffmpeg ${inputoptions[@]} -i "${sourcefile}" ${middleoptions[@]} "${output}"
+    echo
+    _summarize_make
+    _deliver_output
+    shift
+    _log -e
+done
