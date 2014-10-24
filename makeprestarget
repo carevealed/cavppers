@@ -1,6 +1,7 @@
 #!/bin/bash
 # makeprestarget, makes a file according to the video preservation master specifications listed at http://calpreservation.org/wp-content/uploads/2013/10/CAVPPTargetAudioandVideo-Specs2013_IMLS.pdf as of March 10, 2014
 version="1.0"
+set -e
 scriptname=$(basename $(which "$0"))
 scriptdir=$(dirname $(which "$0"))
 . "$scriptdir/cavpperfunctions" || { echo "Missing '$scriptdir/cavpperfunctions'. Exiting." ; exit 1 ;};
