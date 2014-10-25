@@ -1,7 +1,6 @@
 #!/bin/bash
 # makeaccesstarget
 version="1.0"
-set -e
 
 scriptname=$(basename $(which "$0"))
 scriptdir=$(dirname $(which "$0"))
