@@ -6,9 +6,7 @@ scriptdir=$(dirname $(which "$0"))
 . "$scriptdir/cavpperfunctions" || { echo "Missing '$scriptdir/cavpperfunctions'. Exiting." ; exit 1 ;};
 dependencies=(ffmpeg ffprobe)
 _initialize_make
-
 specset=p
-
 usage(){
     echo
     echo "$(basename ${0}) ${version}"
@@ -50,6 +48,22 @@ _check(){
         else
             report -w "INVALID: ${key}:${actualvalue} does not ${operator} ${value}"
         fi
+    elif [[ "${operator}" == "greater" ]] ; then
+        if [[ "${value}" -le "${actualvalue}" ]] ; then
+            if [[ "${verbose}" == "Y" ]] ; then
+                report -d "VALID: ${key}:${actualvalue} ${operator} ${value}"
+            fi
+        else
+            report -w "INVALID: ${key}:${actualvalue} is not ${operator} ${value}"
+        fi
+    elif [[ "${operator}" == "less" ]] ; then
+        if [[ "${value}" -ge "${actualvalue}" ]] ; then
+            if [[ "${verbose}" == "Y" ]] ; then
+                report -d "VALID: ${key}:${actualvalue} ${operator} ${value}"
+            fi
+        else
+            report -w "INVALID: ${key}:${actualvalue} is not ${operator} ${value}"
+        fi
     else
         report -w "ERROR: unknown operator, ${operator}"
         exit
@@ -84,7 +98,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.pix_fmt"              equals "yuv422p10le"
             _check "streams.stream.${videoid}.width"                equals "720"
             _check "streams.stream.${videoid}.height"               equals "486"
-            _check "streams.stream.${videoid}.r_frame_rate"         equals "30000/1001"
+            _check "streams.stream.${videoid}.r_frame_rate"         equals "30000/1001" || equals "2997/100,30"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
         done
         for audioid in $(echo "${audioids}") ; do
@@ -92,6 +106,8 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
+            _check "streams.stream.${audioid}.bit_rate"        greater  "224000"
+            _check "streams.stream.${audioid}.bit_rate"        less     "226000"
         done
     elif [[ "${specset}" = "va" ]] ; then
         # Access media file checks
@@ -104,9 +120,9 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.pix_fmt"              equals "yuv420p"
             _check "streams.stream.${videoid}.width"                equals "720"
             _check "streams.stream.${videoid}.height"               equals "540"
-            _check "streams.stream.${videoid}.r_frame_rate"         equals "30000/1001"
+            _check "streams.stream.${videoid}.r_frame_rate"         equals "30000/1001" || equals "2997/100,30"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
-            _check "streams.stream.${videoid}.bit_rate" equals "1500000"
+            _check "streams.stream.${videoid}.bit_rate"             equals "1500000"
         done
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.codec_name"      contains "aac"
@@ -121,8 +137,8 @@ while [ "${*}" != "" ] ; do
         _check "format.format_name" equals "wav"
         # stream checks
         for audioid in $(echo "${audioids}") ; do
-            _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
-            _check "streams.stream.${audioid}.sample_rate"     equals   "96000"
+            _check "streams.stream.${audioid}.bits_per_sample" equals   "24" 
+            _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bit_rate"        equals   "4608000"
         done
@@ -135,7 +151,7 @@ while [ "${*}" != "" ] ; do
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.channel_layout"  equals   "stereo"
             _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bit_rate"        equals   "320000"
+            _check "streams.stream.${audioid}.bit_rate"        equals   "350000" || equals  "400000"
         done
     fi
     rm "${ffprobetmp}"
