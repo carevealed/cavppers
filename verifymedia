@@ -99,7 +99,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.pix_fmt"              equals "yuv422p10le"
             _check "streams.stream.${videoid}.width"                equals "720"
             _check "streams.stream.${videoid}.height"               equals "486"
-            _check "streams.stream.${videoid}.r_frame_rate"         equals "30000/1001" || equals "2997/100,30"
+            _check "streams.stream.${videoid}.r_frame_rate"         equals "2997/100" || equals "30" || equals "30000/1001"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
         done
         for audioid in $(echo "${audioids}") ; do
@@ -121,7 +121,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.pix_fmt"              equals "yuv420p"
             _check "streams.stream.${videoid}.width"                equals "720"
             _check "streams.stream.${videoid}.height"               equals "540"
-            _check "streams.stream.${videoid}.r_frame_rate"         equals "30000/1001" || equals "2997/100,30"
+            _check "streams.stream.${videoid}.r_frame_rate"         equals "2997/100" || equals "30" || equals "30000/1001"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
             _check "streams.stream.${videoid}.bit_rate"             equals "1500000"
         done
