@@ -28,11 +28,20 @@ _makeffprobe(){
     audioids=$(grep "streams.stream.*.codec_type=\"audio\"" "${ffprobetmp}" | cut -d. -f3)
 }
 
+_makemediainfo(){
+    mediainfotmp=$(maketemp)
+    mediainfo -f --language=raw "$1" > "${mediainfotmp}"
+}
+
 _check(){
     key="${1}"
     operator="${2}"
     value="${3}"
-    actualvalue=$(grep "${key}" "${ffprobetmp}" | cut -d= -f2 | sed 's/^"//g' | sed 's/"$//g' )
+    if [[ "${key}" ==  mediainfo.* ]] ; then
+        actualvalue=$(grep "${key#mediainfo.} " "${mediainfotmp}" | cut -d: -f2 | sed 's/ //g')
+    else
+        actualvalue=$(grep "${key}" "${ffprobetmp}" | cut -d= -f2 | sed 's/^"//g' | sed 's/"$//g' )
+    fi
     if [[ "${operator}" == "equals" ]] ; then
         if [[ "${value}" == "${actualvalue}" ]] ; then
             if [[ "${verbose}" == "Y" ]] ; then
@@ -96,6 +105,7 @@ while [ "${*}" != "" ] ; do
     input="$1"
     report -dt "Testing ${input}"
     _makeffprobe "${input}"
+    _makemediainfo "${input}"
     if [[ "${specset}" = "vp" ]] ; then
         # Preservation media file checks
         # format checks
@@ -123,6 +133,7 @@ while [ "${*}" != "" ] ; do
         # format checks
         _check "format.filename" contains ".mp4"
         _check "format.format_long_name" equals "QuickTime / MOV"
+        _check "mediainfo.ScanType" equals "Progressive"
         # stream checks
         for videoid in $(echo "${videoids}") ; do
             _check "streams.stream.${videoid}.codec_tag_string"     equals "avc1"
@@ -146,7 +157,7 @@ while [ "${*}" != "" ] ; do
         _check "format.format_name" equals "wav"
         # stream checks
         for audioid in $(echo "${audioids}") ; do
-            _check "streams.stream.${audioid}.bits_per_sample" equals   "24" 
+            _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
             _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bit_rate"        equals   "4608000"
