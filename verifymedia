@@ -58,6 +58,14 @@ _check(){
         else
             report -w "INVALID: ${key}:${actualvalue} does not ${operator} ${value}"
         fi
+    elif [[ "${operator}" == "is_in_list" ]] ; then
+        if [[ "${value}" == *"${actualvalue/$value/}"* ]] ; then
+            if [[ "${verbose}" == "Y" ]] ; then
+                report -d "VALID: ${key}:${actualvalue} ${operator} ${value}"
+            fi
+        else
+            report -w "INVALID: ${key}:${actualvalue} does not ${operator} ${value}"
+        fi
     elif [[ "${operator}" == "greater" ]] ; then
         if [[ "${value}" -le "${actualvalue}" ]] ; then
             if [[ "${verbose}" == "Y" ]] ; then
@@ -111,7 +119,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.pix_fmt"              equals "yuv422p10le"
             _check "streams.stream.${videoid}.width"                equals "720"
             _check "streams.stream.${videoid}.height"               equals "486"
-            _check "streams.stream.${videoid}.r_frame_rate"         equals "2997/100" || equals "30" || equals "30000/1001"
+            _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
         done
         for audioid in $(echo "${audioids}") ; do
@@ -132,7 +140,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.pix_fmt"              equals "yuv420p"
             _check "streams.stream.${videoid}.width"                equals "720"
             _check "streams.stream.${videoid}.height"               equals "540"
-            _check "streams.stream.${videoid}.r_frame_rate"         equals "2997/100" || equals "30" || equals "30000/1001"
+            _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
             _check "streams.stream.${videoid}.bit_rate"             equals "1500000"
         done
@@ -163,7 +171,7 @@ while [ "${*}" != "" ] ; do
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.channel_layout"  equals   "stereo"
             _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bit_rate"        equals   "350000" || equals  "400000"
+            _check "streams.stream.${audioid}.bit_rate"  is_in_list "350000 400000"
         done
     fi
     rm "${ffprobetmp}"
