@@ -93,6 +93,8 @@ while [ "${*}" != "" ] ; do
         # format checks
         _check "format.filename" contains ".mov"
         _check "format.format_long_name" equals "QuickTime / MOV"
+        _check "format.bit_rate"        greater  "234881024"     # 224Mb in bits
+        _check "format.bit_rate"        less     "236978176"     # 226Mb in bits
         # stream checks
         for videoid in $(echo "${videoids}") ; do
             _check "streams.stream.${videoid}.codec_tag_string"     equals "v210"
@@ -107,8 +109,6 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
-            _check "streams.stream.${audioid}.bit_rate"        greater  "224000"
-            _check "streams.stream.${audioid}.bit_rate"        less     "226000"
         done
     elif [[ "${specset}" = "va" ]] ; then
         # Access media file checks
