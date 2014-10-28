@@ -14,6 +14,7 @@ usage(){
     echo "Dependencies: ${dependencies[@]}"
     echo "Usage: $(basename $0) [ -h ] [ -s a/p ] file1 [ file2 ...]"
     echo "  -s ( set a specification set, either 'va' for video access file, 'vp' for video preservation file, 'aa' for audio access file, 'ap' for audio preservation file, default is 'vp' )"
+    echo "  -v ( be verbose and show all tests, pass or file )"
     echo "  -h ( display this help )"
     echo
     exit
