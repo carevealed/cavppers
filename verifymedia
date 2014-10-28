@@ -171,7 +171,7 @@ while [ "${*}" != "" ] ; do
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.channel_layout"  equals   "stereo"
             _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bit_rate"  is_in_list "350000 400000"
+            _check "streams.stream.${audioid}.bit_rate"        is_in_list "350000 400000"
         done
     fi
     rm "${ffprobetmp}"
