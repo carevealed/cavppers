@@ -102,79 +102,158 @@ done
 shift $(( ${OPTIND} - 1 ))
 
 while [ "${*}" != "" ] ; do
+
+    if [ -f "${*}" ] ; then 
     input="$1"
     report -dt "Testing ${input}"
     _makeffprobe "${input}"
     _makemediainfo "${input}"
-    if [[ "${specset}" = "vp" ]] ; then
-        # Preservation media file checks
-        # format checks
-        _check "format.filename" contains ".mov"
-        _check "format.format_long_name" equals "QuickTime / MOV"
-        _check "format.bit_rate"        greater  "234881024"     # 224Mb in bits
-        _check "format.bit_rate"        less     "236978176"     # 226Mb in bits
-        # stream checks
-        for videoid in $(echo "${videoids}") ; do
-            _check "streams.stream.${videoid}.codec_tag_string"     equals "v210"
-            _check "streams.stream.${videoid}.pix_fmt"              equals "yuv422p10le"
-            _check "streams.stream.${videoid}.width"                equals "720"
-            _check "streams.stream.${videoid}.height"               equals "486"
-            _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
-            _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
+        if [[ "${specset}" = "vp" ]] ; then
+            # Preservation media file checks
+            # format checks
+            _check "format.filename" contains ".mov"
+            _check "format.format_long_name" equals "QuickTime / MOV"
+            _check "format.bit_rate"        greater  "234881024"     # 224Mb in bits
+            _check "format.bit_rate"        less     "236978176"     # 226Mb in bits
+            # stream checks
+            for videoid in $(echo "${videoids}") ; do
+                _check "streams.stream.${videoid}.codec_tag_string"     equals "v210"
+                _check "streams.stream.${videoid}.pix_fmt"              equals "yuv422p10le"
+                _check "streams.stream.${videoid}.width"                equals "720"
+                _check "streams.stream.${videoid}.height"               equals "486"
+                _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
+                _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
+            done
+            for audioid in $(echo "${audioids}") ; do
+                _check "streams.stream.${audioid}.codec_name"      contains "pcm"
+                _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
+                _check "streams.stream.${audioid}.channels"        equals   "2"
+                _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
+            done
+        elif [[ "${specset}" = "va" ]] ; then
+            # Access media file checks
+            # format checks
+            _check "format.filename" contains ".mp4"
+            _check "format.format_long_name" equals "QuickTime / MOV"
+            _check "mediainfo.ScanType" equals "Progressive"
+            # stream checks
+            for videoid in $(echo "${videoids}") ; do
+                _check "streams.stream.${videoid}.codec_tag_string"     equals "avc1"
+                _check "streams.stream.${videoid}.pix_fmt"              equals "yuv420p"
+                _check "streams.stream.${videoid}.width"                equals "720"
+                _check "streams.stream.${videoid}.height"               equals "540"
+                _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
+                _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
+                _check "streams.stream.${videoid}.bit_rate"             equals "1500000"
+            done
+            for audioid in $(echo "${audioids}") ; do
+                _check "streams.stream.${audioid}.codec_name"      contains "aac"
+                _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
+                _check "streams.stream.${audioid}.channels"        equals   "2"
+                _check "streams.stream.${audioid}.bit_rate"        equals   "160000"
+            done
+        elif [[ "${specset}" = "ap" ]] ; then
+            # Access media file checks
+            # format checks
+            _check "format.filename" contains ".wav"
+            _check "format.format_name" equals "wav"
+            # stream checks
+            for audioid in $(echo "${audioids}") ; do
+                _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
+                _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
+                _check "streams.stream.${audioid}.channels"        equals   "2"
+                _check "streams.stream.${audioid}.bit_rate"        equals   "4608000"
+            done
+        elif [[ "${specset}" = "aa" ]] ; then
+            # Access media file checks
+            # format checks
+            _check "format.filename" contains ".mp3"
+            _check "format.format_name" equals "mp3"
+            # stream checks
+            for audioid in $(echo "${audioids}") ; do
+                _check "streams.stream.${audioid}.channel_layout"  equals   "stereo"
+                _check "streams.stream.${audioid}.channels"        equals   "2"
+                _check "streams.stream.${audioid}.bit_rate"        is_in_list "350000 400000"
+            done
+        fi
+        
+    elif [ -d "${*}" ] ; then
+        for files in `ls "${*}"`; do      
+            input="$1"
+            report -dt "Testing ${input}/${files}"
+            _makeffprobe "${input}/${files}"
+            _makemediainfo "${input}/${files}"
+                if [[ "${specset}" = "vp" ]] ; then
+                    # Preservation media file checks
+                    # format checks
+                    _check "format.filename" contains ".mov"
+                    _check "format.format_long_name" equals "QuickTime / MOV"
+                    _check "format.bit_rate"        greater  "234881024"     # 224Mb in bits
+                    _check "format.bit_rate"        less     "236978176"     # 226Mb in bits
+                    # stream checks
+                    for videoid in $(echo "${videoids}") ; do
+                        _check "streams.stream.${videoid}.codec_tag_string"     equals "v210"
+                        _check "streams.stream.${videoid}.pix_fmt"              equals "yuv422p10le"
+                        _check "streams.stream.${videoid}.width"                equals "720"
+                        _check "streams.stream.${videoid}.height"               equals "486"
+                        _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
+                        _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
+                    done
+                    for audioid in $(echo "${audioids}") ; do
+                        _check "streams.stream.${audioid}.codec_name"      contains "pcm"
+                        _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
+                        _check "streams.stream.${audioid}.channels"        equals   "2"
+                        _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
+                    done
+                elif [[ "${specset}" = "va" ]] ; then
+                    # Access media file checks
+                    # format checks
+                    _check "format.filename" contains ".mp4"
+                    _check "format.format_long_name" equals "QuickTime / MOV"
+                    _check "mediainfo.ScanType" equals "Progressive"
+                    # stream checks
+                    for videoid in $(echo "${videoids}") ; do
+                        _check "streams.stream.${videoid}.codec_tag_string"     equals "avc1"
+                        _check "streams.stream.${videoid}.pix_fmt"              equals "yuv420p"
+                        _check "streams.stream.${videoid}.width"                equals "720"
+                        _check "streams.stream.${videoid}.height"               equals "540"
+                        _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
+                        _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
+                        _check "streams.stream.${videoid}.bit_rate"             equals "1500000"
+                    done
+                    for audioid in $(echo "${audioids}") ; do
+                        _check "streams.stream.${audioid}.codec_name"      contains "aac"
+                        _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
+                        _check "streams.stream.${audioid}.channels"        equals   "2"
+                        _check "streams.stream.${audioid}.bit_rate"        equals   "160000"
+                    done
+                elif [[ "${specset}" = "ap" ]] ; then
+                    # Access media file checks
+                    # format checks
+                    _check "format.filename" contains ".wav"
+                    _check "format.format_name" equals "wav"
+                    # stream checks
+                    for audioid in $(echo "${audioids}") ; do
+                        _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
+                        _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
+                        _check "streams.stream.${audioid}.channels"        equals   "2"
+                        _check "streams.stream.${audioid}.bit_rate"        equals   "4608000"
+                    done
+                elif [[ "${specset}" = "aa" ]] ; then
+                    # Access media file checks
+                    # format checks
+                    _check "format.filename" contains ".mp3"
+                    _check "format.format_name" equals "mp3"
+                    # stream checks
+                    for audioid in $(echo "${audioids}") ; do
+                        _check "streams.stream.${audioid}.channel_layout"  equals   "stereo"
+                        _check "streams.stream.${audioid}.channels"        equals   "2"
+                        _check "streams.stream.${audioid}.bit_rate"        is_in_list "350000 400000"
+                    done
+                fi
         done
-        for audioid in $(echo "${audioids}") ; do
-            _check "streams.stream.${audioid}.codec_name"      contains "pcm"
-            _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
-            _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
-        done
-    elif [[ "${specset}" = "va" ]] ; then
-        # Access media file checks
-        # format checks
-        _check "format.filename" contains ".mp4"
-        _check "format.format_long_name" equals "QuickTime / MOV"
-        _check "mediainfo.ScanType" equals "Progressive"
-        # stream checks
-        for videoid in $(echo "${videoids}") ; do
-            _check "streams.stream.${videoid}.codec_tag_string"     equals "avc1"
-            _check "streams.stream.${videoid}.pix_fmt"              equals "yuv420p"
-            _check "streams.stream.${videoid}.width"                equals "720"
-            _check "streams.stream.${videoid}.height"               equals "540"
-            _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
-            _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
-            _check "streams.stream.${videoid}.bit_rate"             equals "1500000"
-        done
-        for audioid in $(echo "${audioids}") ; do
-            _check "streams.stream.${audioid}.codec_name"      contains "aac"
-            _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
-            _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bit_rate"        equals   "160000"
-        done
-    elif [[ "${specset}" = "ap" ]] ; then
-        # Access media file checks
-        # format checks
-        _check "format.filename" contains ".wav"
-        _check "format.format_name" equals "wav"
-        # stream checks
-        for audioid in $(echo "${audioids}") ; do
-            _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
-            _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
-            _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bit_rate"        equals   "4608000"
-        done
-    elif [[ "${specset}" = "aa" ]] ; then
-        # Access media file checks
-        # format checks
-        _check "format.filename" contains ".mp3"
-        _check "format.format_name" equals "mp3"
-        # stream checks
-        for audioid in $(echo "${audioids}") ; do
-            _check "streams.stream.${audioid}.channel_layout"  equals   "stereo"
-            _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bit_rate"        is_in_list "350000 400000"
-        done
-    fi
     rm "${ffprobetmp}"
+    fi
     shift
     _log -e
 done
