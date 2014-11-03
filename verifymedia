@@ -146,7 +146,7 @@ while [ "${*}" != "" ] ; do
         done
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.codec_name"      contains "aac"
-            _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
+            _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bit_rate"        equals   "160000"
         done
