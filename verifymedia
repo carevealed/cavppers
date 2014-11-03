@@ -144,7 +144,6 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.height"               equals "540"
             _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
-            _check "streams.stream.${videoid}.bit_rate"             equals "1500000"
         done
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.codec_name"      contains "aac"
