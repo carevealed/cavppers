@@ -111,8 +111,8 @@ while [ "${*}" != "" ] ; do
         # format checks
         _check "format.filename" contains ".mov"
         _check "format.format_long_name" equals "QuickTime / MOV"
-        _check "format.bit_rate"        greater  "224000000"     # 224Mb in bits
-        _check "format.bit_rate"        less     "226000000"     # 226Mb in bits
+        _check "format.bit_rate"        greater  "223500000"     # 224Mb (rounded) in bits
+        _check "format.bit_rate"        less     "226500000"     # 226Mb (rounded) in bits
         # stream checks
         for videoid in $(echo "${videoids}") ; do
             _check "streams.stream.${videoid}.codec_tag_string"     equals "v210"
