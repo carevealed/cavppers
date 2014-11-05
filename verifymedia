@@ -149,7 +149,8 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.codec_name"      contains "aac"
             _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
             _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bit_rate"        equals   "160000"
+            _check "streams.stream.${audioid}.bit_rate"        greater  "157000" # 157Kb in bits (rounds to 160)
+            _check "streams.stream.${audioid}.bit_rate"        less     "160500" # 160.5Kb in bits 
         done
     elif [[ "${specset}" = "ap" ]] ; then
         # Access media file checks
