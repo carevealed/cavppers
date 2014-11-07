@@ -153,14 +153,14 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.bit_rate"        less     "160500" # 160.5Kb in bits 
         done
     elif [[ "${specset}" = "ap" ]] ; then
-        # Access media file checks
+        # Preservation media file checks
         # format checks
         _check "format.filename" contains ".wav"
         _check "format.format_name" equals "wav"
         # stream checks
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
-            _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
+            _check "streams.stream.${audioid}.sample_rate"     equals   "96000"
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bit_rate"        equals   "4608000"
         done
