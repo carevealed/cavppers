@@ -171,9 +171,10 @@ while [ "${*}" != "" ] ; do
         _check "format.format_name" equals "mp3"
         # stream checks
         for audioid in $(echo "${audioids}") ; do
+            _check "streams.stream.${audioid}.sample_rate"     equals   "44100"
             _check "streams.stream.${audioid}.channel_layout"  equals   "stereo"
             _check "streams.stream.${audioid}.channels"        equals   "2"
-            _check "streams.stream.${audioid}.bit_rate"  is_in_list "350000 400000"
+            _check "streams.stream.${audioid}.bit_rate"        equals "320000"
         done
     fi
     rm "${ffprobetmp}"
