@@ -92,7 +92,8 @@ while [ "${*}" != "" ] ; do
     fi
     if [[ "${AUDIOSTREAMCOUNT}" > 0 ]] ; then
         middleoptions+=(-map 0:a)               # process all audio streams of the input
-        middleoptions+=(-c:a libfaac)           # force audio codec to AAC
+        middleoptions+=(-c:a aac)              # force audio codec to AAC
+        middleoptions+=(-strict -2)             # allow use of experimental AAC encoder
         middleoptions+=(-b:a 160k)              # force audio to 160 Kbps stream bitrate
         middleoptions+=(-ac 2)                  # force audio to 2 Channels
         middleoptions+=(-r:a 48k)               # force audio to 48kHz sampling rate
