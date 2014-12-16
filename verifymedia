@@ -120,7 +120,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
             _check "streams.stream.${videoid}.bit_rate"             greater "223500000"     # 224Mb (rounded) in bits
-            _check "streams.stream.${videoid}.bit_rate"             less "226500000"     # 226Mb (rounded) in bits
+            _check "streams.stream.${videoid}.bit_rate"             less    "224500000"     # 225Mb (rounded) in bits
         done
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.codec_name"      contains "pcm"
