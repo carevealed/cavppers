@@ -111,8 +111,6 @@ while [ "${*}" != "" ] ; do
         # format checks
         _check "format.filename" contains ".mov"
         _check "format.format_long_name" equals "QuickTime / MOV"
-        _check "mediainfo.OverallBitRate" greater  "223500000"     # 224Mb (rounded) in bits
-        _check "mediainfo.OverallBitRate" less     "226500000"     # 226Mb (rounded) in bits
         # stream checks
         for videoid in $(echo "${videoids}") ; do
             _check "streams.stream.${videoid}.codec_tag_string"     equals "v210"
@@ -121,12 +119,15 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${videoid}.height"               equals "486"
             _check "streams.stream.${videoid}.r_frame_rate"         is_in_list "2997/100 30 30000/1001"
             _check "streams.stream.${videoid}.display_aspect_ratio" equals "4:3"
+            _check "streams.stream.${videoid}.bit_rate"             greater "223500000"     # 224Mb (rounded) in bits
+            _check "streams.stream.${videoid}.bit_rate"             less "226500000"     # 226Mb (rounded) in bits
         done
         for audioid in $(echo "${audioids}") ; do
             _check "streams.stream.${audioid}.codec_name"      contains "pcm"
             _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
+            _check "streams.stream.${videoid}.bit_rate"        equals   "2304000"
         done
     elif [[ "${specset}" = "va" ]] ; then
         # Access media file checks
