@@ -136,7 +136,7 @@ while [ "${*}" != "" ] ; do
         _check "format.format_long_name" equals "QuickTime / MOV"
         _check "mediainfo.ScanType" equals "Progressive"
         _check "mediainfo.OverallBitRate" greater  "3500000"     # 3.5Mb in bits
-        _check "mediainfo.OverallBitRate" less     "4000000"     # 4Mb in bits
+        _check "mediainfo.OverallBitRate" less     "4300000"     # 4.3Mb in bits
         # stream checks
         for videoid in $(echo "${videoids}") ; do
             _check "streams.stream.${videoid}.codec_tag_string"     equals "avc1"
