@@ -127,7 +127,7 @@ while [ "${*}" != "" ] ; do
             _check "streams.stream.${audioid}.sample_rate"     equals   "48000"
             _check "streams.stream.${audioid}.channels"        equals   "2"
             _check "streams.stream.${audioid}.bits_per_sample" equals   "24"
-            _check "streams.stream.${videoid}.bit_rate"        equals   "2304000"
+            _check "streams.stream.${audioid}.bit_rate"        equals   "2304000"
         done
     elif [[ "${specset}" = "va" ]] ; then
         # Access media file checks
