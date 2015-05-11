@@ -87,7 +87,7 @@ while [ "${*}" != "" ] ; do
         middleoptions+=(-c:v libx264)           # force video codec to libx264
         middleoptions+=(-r ntsc)                # force NSTC frame rate
         middleoptions+=(-aspect 4/3)            # force aspect ratio to 4:3
-        middleoptions+=(-vf yadif,scale=720:540,setdar=4/3)  # scale to 720x540 with interlace awareness and set display aspect ratio to 4/3
+        middleoptions+=(-vf yadif,scale=720:540)  # scale to 720x540 with interlace awareness 
         middleoptions+=(-pix_fmt yuv420p)       # force colorspace to YUV
     fi
     if [[ "${AUDIOSTREAMCOUNT}" > 0 ]] ; then
