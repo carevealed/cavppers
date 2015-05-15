@@ -86,6 +86,7 @@ while [ "${*}" != "" ] ; do
         middleoptions+=(-b:v 3.5M)              # stream bitrate fixed at 3.5mbps
         middleoptions+=(-c:v libx264)           # force video codec to libx264
         middleoptions+=(-r ntsc)                # force NSTC frame rate
+        middleoptions+=(-aspect 4/3)            # force aspect ratio to 4:3 
         middleoptions+=(-vf yadif,scale=720:540)  # scale to 720x540 with interlace awareness 
         middleoptions+=(-pix_fmt yuv420p)       # force colorspace to YUV
     fi
