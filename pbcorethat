@@ -1,0 +1,93 @@
+#!/bin/bash
+SCRIPTDIR="$(dirname "${0}")"
+PBCOREEXTENSION="_PBCore_draft"
+
+# very very basic instructions
+_usage(){
+  echo "Provide this script with a folder to search for metadata and files."
+  exit
+}
+
+# a function to check if a directory exists and if not then exit
+_checkdir(){
+    if [[ ! -d "${1}" ]] ; then
+        echo "${1}" is not a directory.
+        _usage
+        exit 1
+    fi
+}
+
+# this function makes a temporary files and this script uses a lot of them
+_maketemp(){
+    mktemp -q "/tmp/$(basename "${0}").XXXXXX"
+    if [ "${?}" -ne 0 ]; then
+        echo "${0}: Can't create temp file, exiting..."
+        _writeerrorlog "_maketemp" "was unable to create the temp file, so the script had to exit."
+        exit 1
+    fi
+}
+
+# This finds all the csvs into the folder to be analyzed and strings them together and makes an xml representation of that.
+_make_inventory(){
+  # find inventories
+  INVENTORY_LIST=$(_maketemp)
+  find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" > "${INVENTORY_LIST}"
+
+  if [[ $(cat "${INVENTORY_LIST}" | awk 'END{print NR}') = "0" ]] ; then
+    # if no inventories are found, complain and exit
+    echo "Error: no inventory files were found in $(basename "${INVENTORY_LIST}")"
+    exit
+  else
+    INVENTORY_CAT=$(_maketemp)
+    cat "${ANALYSIS_DIR}"/*.csv | csvprintf -x -f - > "${INVENTORY_CAT}"
+  fi
+}
+
+# if not arguments, then show the help stuff and exit
+if [ "${#}" = 0 ] ; then
+  _usage
+fi
+
+ANALYSIS_DIR="${1}"
+
+_checkdir "${ANALYSIS_DIR}"
+
+# find inventory and exit if it's not there.
+INVENTORY=$(find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" | head -n 1)
+if [[ ! -f "${INVENTORY}" ]] ; then
+    echo "Error: no inventory files were found in $(basename "${ANALYSIS_DIR}")"
+    exit 1
+else
+    echo "Using $(basename "${INVENTORY}") as an inventory."
+    INVENTORY_XML=$(_maketemp)
+    csvprintf -x -f "$INVENTORY" > "$INVENTORY_XML"
+fi
+
+# find packages and make some metadata of them
+find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read PACKAGE ; do
+  PACKAGENAME=$(basename "${PACKAGE}")
+  PACKAGE_INVENTORY_XML=$(_maketemp)
+  echo "Examining package (${PACKAGE}) and making a temp xml for it at ${PACKAGE_INVENTORY_XML}"
+  if [[ $(xml sel -t -m "/csv/row[col2='${PACKAGENAME}']" -c . "${INVENTORY_XML}") ]] ; then
+    echo "Found ${PACKAGENAME} in the inventory."
+    unset MI_LIST
+    while read FILE ; do
+      echo "Analyzing $FILE"
+      MI_TMP=$(_maketemp)
+      mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
+      MI_LIST+="${MI_TMP}"
+      MI_LIST+="+"
+    done < <(find "${PACKAGE}" -type f -name '*prsv*' ! -name '.*' ! -name '*.xml')
+    while read FILE ; do
+      echo "Analyzing $FILE"
+      MI_TMP=$(_maketemp)
+      mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
+      MI_LIST+="${MI_TMP}"
+      MI_LIST+="+"
+    done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' )
+    echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST%?}"
+    xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations "${MI_LIST%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xml fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
+  else
+    echo "Did not find $PACKAGENAME in the inventory."
+  fi
+done
