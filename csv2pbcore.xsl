@@ -111,6 +111,17 @@
       </instantiationLanguage>
     </xsl:if>
   </xsl:template>
+  <xsl:template name="instantiation-annotation-extant" match="col26">
+    <xsl:if test="string-length(.)>0">
+      <instantiationAnnotation>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="source">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </instantiationAnnotation>
+    </xsl:if>
+  </xsl:template>
   <!-- identifiers -->
   <xsl:template name="identifier-cavpp" match="col2|col3|col4">
     <xsl:if test="string-length(.)>0">
