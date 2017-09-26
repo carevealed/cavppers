@@ -37,7 +37,7 @@
         <xsl:apply-templates select="XXX" mode="instantiation"/><!-- id -->
         <xsl:apply-templates select="XXX" mode="instantiation"/><!-- date -->
         <xsl:apply-templates select="col25"/><!-- physical -->
-        <xsl:apply-templates select="XXX"/><!-- location -->
+        <xsl:apply-templates select="col6"/><!-- location -->
         <xsl:apply-templates select="col8"/><!-- mediatype -->
         <xsl:apply-templates select="col9"/><!-- generations -->
         <xsl:apply-templates select="col29"/><!-- colors -->
@@ -306,7 +306,7 @@
       </instantiationPhysical>
     </xsl:if>
   </xsl:template>
-  <xsl:template name="instantiationLocation" match="XXX">
+  <xsl:template name="instantiationLocation" match="col6">
     <xsl:if test="string-length(.)>0">
       <instantiationLocation>
         <xsl:value-of select="."/>
