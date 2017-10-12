@@ -66,21 +66,37 @@
     </xsl:if>
   </xsl:template>
   <!-- Dates -->
-  <xsl:template name="date_created" match="col23">
-    <xsl:if test="string-length(substring(.,3,string-length(.)-3))>0">
-      <pbcoreAssetDate>
-        <xsl:attribute name="dateType">Created</xsl:attribute>
-        <xsl:value-of select="substring(.,3,string-length(.)-3)"/>
-      </pbcoreAssetDate>
-    </xsl:if>
+  <xsl:template name="date_created" match="col22">
+    <xsl:choose>
+      <xsl:when test="string-length(.)=10">
+        <pbcoreAssetDate>
+          <xsl:attribute name="dateType">Created</xsl:attribute>
+          <xsl:value-of select="."/>
+        </pbcoreAssetDate>
+      </xsl:when>
+      <xsl:when test="string-length(substring(.,3,string-length(.)-3))>0">
+        <pbcoreAssetDate>
+          <xsl:attribute name="dateType">Created</xsl:attribute>
+          <xsl:value-of select="substring(.,3,string-length(.)-3)"/>
+        </pbcoreAssetDate>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
-  <xsl:template name="date_published" match="col22">
-    <xsl:if test="string-length(substring(.,3,string-length(.)-3))>0">
-      <pbcoreAssetDate>
-        <xsl:attribute name="dateType">Published</xsl:attribute>
-        <xsl:value-of select="substring(.,3,string-length(.)-3)"/>
-      </pbcoreAssetDate>
-    </xsl:if>
+  <xsl:template name="date_published" match="col23">
+    <xsl:choose>
+      <xsl:when test="string-length(.)=10">
+        <pbcoreAssetDate>
+          <xsl:attribute name="dateType">Published</xsl:attribute>
+          <xsl:value-of select="."/>
+        </pbcoreAssetDate>
+      </xsl:when>
+      <xsl:when test="string-length(substring(.,3,string-length(.)-3))>0">
+        <pbcoreAssetDate>
+          <xsl:attribute name="dateType">Published</xsl:attribute>
+          <xsl:value-of select="substring(.,3,string-length(.)-3)"/>
+        </pbcoreAssetDate>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
   <xsl:template name="date-instantiation" match="XXX" mode="instantiation">
     <xsl:if test="string-length(.)>0">
