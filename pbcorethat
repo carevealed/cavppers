@@ -49,6 +49,23 @@ if [ "${#}" = 0 ] ; then
   _usage
 fi
 
+_getmd5(){
+  FILE="${1}"
+  if [[ -f "${FILE}.md5" ]] ; then
+    MD5=$(head -n 1 "${FILE}.md5")
+    if [[ -n "${MD5}" ]] ; then
+      xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+        --append "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -type elem -n instantiationIdentifier -v "${MD5}" \
+          "${MI_TMP}"
+      xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+        --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "source" -v "California Revealed" \
+        --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "version" -v "MD5" \
+        --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "annotation" -v "checksum" \
+        "${MI_TMP}"
+    fi
+  fi
+}
+
 ANALYSIS_DIR="${1}"
 
 _checkdir "${ANALYSIS_DIR}"
@@ -77,6 +94,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
       MI_TMP=$(_maketemp)
       mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
       xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
+      _getmd5 "$FILE"
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
     done < <(find "${PACKAGE}" -type f -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
@@ -85,6 +103,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
       MI_TMP=$(_maketemp)
       mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
       xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
+      _getmd5 "$FILE"
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
     done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
