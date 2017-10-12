@@ -37,7 +37,7 @@
         <xsl:apply-templates select="XXX" mode="instantiation"/><!-- id -->
         <xsl:apply-templates select="XXX" mode="instantiation"/><!-- date -->
         <xsl:apply-templates select="col25"/><!-- physical -->
-        <xsl:apply-templates select="XXX"/><!-- location -->
+        <xsl:apply-templates select="col6"/><!-- location -->
         <xsl:apply-templates select="col8"/><!-- mediatype -->
         <xsl:apply-templates select="col9"/><!-- generations -->
         <xsl:apply-templates select="col29"/><!-- colors -->
@@ -109,6 +109,17 @@
       <instantiationLanguage>
         <xsl:value-of select="."/>
       </instantiationLanguage>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template name="instantiation-annotation-extant" match="col26">
+    <xsl:if test="string-length(.)>0">
+      <instantiationAnnotation>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="source">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </instantiationAnnotation>
     </xsl:if>
   </xsl:template>
   <!-- identifiers -->
@@ -295,7 +306,7 @@
       </instantiationPhysical>
     </xsl:if>
   </xsl:template>
-  <xsl:template name="instantiationLocation" match="XXX">
+  <xsl:template name="instantiationLocation" match="col6">
     <xsl:if test="string-length(.)>0">
       <instantiationLocation>
         <xsl:value-of select="."/>

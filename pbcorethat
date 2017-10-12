@@ -1,6 +1,7 @@
 #!/bin/bash
 SCRIPTDIR="$(dirname "${0}")"
 PBCOREEXTENSION="_PBCore_draft"
+FILE_INSTANTIATIONLOCATION_VALUE="California Revealed Digital Repository"
 
 # very very basic instructions
 _usage(){
@@ -75,6 +76,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
       echo "Analyzing $FILE"
       MI_TMP=$(_maketemp)
       mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
+      xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
     done < <(find "${PACKAGE}" -type f -name '*prsv*' ! -name '.*' ! -name '*.xml')
@@ -82,6 +84,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
       echo "Analyzing $FILE"
       MI_TMP=$(_maketemp)
       mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
+      xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
     done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' )
