@@ -23,10 +23,10 @@
       All values listed below must also be referenced by a function below.-->
       <xsl:apply-templates select="col7"/><!-- Asset Type -->
       <xsl:apply-templates select="col22|col23"/><!-- Dates -->
-      <xsl:apply-templates select="col1|col2|col3|col4|col67|col68|col69"/><!-- identifiers -->
+      <xsl:apply-templates select="col1|col2|col3|col4|col69"/><!-- identifiers -->
       <xsl:apply-templates select="col10|col11|col12"/><!-- titles -->
       <xsl:apply-templates select="col42|col43"/><!-- subjects -->
-      <xsl:apply-templates select="col13"/><!-- descriptions -->
+      <xsl:apply-templates select="col13|col67|col68"/><!-- descriptions -->
       <xsl:apply-templates select="col45"/><!-- genre -->
       <xsl:apply-templates select="col15|col16|col17|col18|col19|col20"/><!-- creator -->
       <xsl:apply-templates select="col30|col31|col32|col33|col34|col35|col36|col37|col38"/><!-- contributor -->
@@ -147,7 +147,7 @@
       </pbcoreIdentifier>
     </xsl:if>
   </xsl:template>
-  <xsl:template name="identifier-cdl" match="col67|col68|col69">
+  <xsl:template name="identifier-cdl" match="col69">
     <xsl:if test="string-length(.)>0">
       <pbcoreIdentifier>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
@@ -196,7 +196,7 @@
     </xsl:if>
   </xsl:template>
   <!-- descriptions -->
-  <xsl:template name="description" match="col13">
+  <xsl:template name="description" match="col13|col67|col68">
     <xsl:if test="string-length(.)>0">
       <pbcoreDescription>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
