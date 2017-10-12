@@ -217,14 +217,23 @@
     </xsl:if>
   </xsl:template>
   <!-- coverage -->
-  <xsl:template name="coverage" match="col45|col46">
+  <xsl:template name="coverage-spatial" match="col45">
     <xsl:if test="string-length(.)>0">
       <pbcoreCoverage>
-        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
-        <xsl:attribute name="coverageType">
-          <xsl:value-of select="../../row[1]/*[$column]"/>
-        </xsl:attribute>
-        <xsl:value-of select="."/>
+        <coverage>
+          <xsl:value-of select="."/>
+        </coverage>
+        <coverageType>Spatial</coverageType>
+      </pbcoreCoverage>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template name="coverage-temporal" match="col46">
+    <xsl:if test="string-length(.)>0">
+      <pbcoreCoverage>
+        <coverage>
+          <xsl:value-of select="."/>
+        </coverage>
+        <coverageType>Temporal</coverageType>
       </pbcoreCoverage>
     </xsl:if>
   </xsl:template>
