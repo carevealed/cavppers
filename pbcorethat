@@ -68,7 +68,7 @@ fi
 find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read PACKAGE ; do
   PACKAGENAME=$(basename "${PACKAGE}")
   PACKAGE_INVENTORY_XML=$(_maketemp)
-  echo "p $PACKAGE pn $PACKAGENAME pix $PACKAGE_INVENTORY_XML"
+  echo "Examining package (${PACKAGE}) and making a temp xml for it at ${PACKAGE_INVENTORY_XML}"
   if [[ $(xml sel -t -m "/csv/row[col2='${PACKAGENAME}']" -c . "${INVENTORY_XML}") ]] ; then
     echo "Found ${PACKAGENAME} in the inventory."
     unset MI_LIST
@@ -88,8 +88,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
     done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' )
-    echo "mi list ${MI_LIST}"
-    echo "uh ${MI_LIST%?}"
+    echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST%?}"
     xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations "${MI_LIST%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xml fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
   else
     echo "Did not find $PACKAGENAME in the inventory."
