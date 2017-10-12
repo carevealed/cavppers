@@ -79,7 +79,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
       xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
-    done < <(find "${PACKAGE}" -type f -name '*prsv*' ! -name '.*' ! -name '*.xml')
+    done < <(find "${PACKAGE}" -type f -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
     while read FILE ; do
       echo "Analyzing $FILE"
       MI_TMP=$(_maketemp)
@@ -87,7 +87,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
       xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
-    done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' )
+    done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
     echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST%?}"
     xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations "${MI_LIST%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xml fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
   else
