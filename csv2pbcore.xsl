@@ -11,9 +11,6 @@
       <xsl:attribute name="collectionSource">
         <xsl:value-of select="row[starts-with(col2,$select)]/col6"/>
       </xsl:attribute>
-      <xsl:attribute name="collectionSourceAGAIN">
-        <xsl:value-of select="row[starts-with(col2,$select)]/col65"/>
-      </xsl:attribute>
       <xsl:apply-templates select="row[starts-with(col2,$select)]"/>
     </pbcoreCollection>
   </xsl:template>
