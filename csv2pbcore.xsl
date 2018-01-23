@@ -31,7 +31,7 @@
       <xsl:apply-templates select="col24|col60|col61|col62|col63|col64"/><!-- rights -->
 
       <pbcoreInstantiation>
-        <xsl:apply-templates select="XXX" mode="instantiation"/><!-- id -->
+        <xsl:apply-templates select="col2" mode="instantiation"/><!-- id -->
         <xsl:apply-templates select="XXX" mode="instantiation"/><!-- date -->
         <xsl:apply-templates select="col25"/><!-- physical -->
         <xsl:apply-templates select="col6"/><!-- location -->
@@ -184,18 +184,6 @@
       </pbcoreIdentifier>
     </xsl:if>
   </xsl:template>
-  <xsl:template name="inst-identifier-cavpp" match="XXX" mode="instantiation">
-    <xsl:if test="string-length(.)>0">
-      <instantiationIdentifier>
-        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
-        <xsl:attribute name="source">CAVPP</xsl:attribute>
-        <xsl:attribute name="annotation">
-          <xsl:value-of select="../../row[1]/*[$column]"/>
-        </xsl:attribute>
-        <xsl:value-of select="."/>
-      </instantiationIdentifier>
-    </xsl:if>
-  </xsl:template>
   <!-- titles -->
   <xsl:template name="title" match="col10|col11|col12">
     <xsl:if test="string-length(.)>0">
@@ -333,6 +321,18 @@
     </xsl:if>
   </xsl:template>
   <!-- instantiation stuff -->
+  <xsl:template name="inst-identifier-cavpp" match="col2" mode="instantiation">
+    <xsl:if test="string-length(.)>0">
+      <instantiationIdentifier>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="source">CAVPP</xsl:attribute>
+        <xsl:attribute name="annotation">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </instantiationIdentifier>
+    </xsl:if>
+  </xsl:template>
   <xsl:template name="instantiationPhysical" match="col25">
     <xsl:if test="string-length(.)>0">
       <instantiationPhysical>
