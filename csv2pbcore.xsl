@@ -20,7 +20,7 @@
       All values listed below must also be referenced by a function below.-->
       <xsl:apply-templates select="col7"/><!-- Asset Type -->
       <xsl:apply-templates select="col22|col23"/><!-- Dates -->
-      <xsl:apply-templates select="col1|col2|col3|col4|col69"/><!-- identifiers -->
+      <xsl:apply-templates select="col1|col2|col3|col4|col65|col69"/><!-- identifiers -->
       <xsl:apply-templates select="col10|col11|col12"/><!-- titles -->
       <xsl:apply-templates select="col42|col43"/><!-- subjects -->
       <xsl:apply-templates select="col13|col67|col68"/><!-- descriptions -->
@@ -153,6 +153,18 @@
       <pbcoreIdentifier>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
         <xsl:attribute name="source">Object URL</xsl:attribute>
+        <xsl:attribute name="annotation">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </pbcoreIdentifier>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template name="identifier-institution-url" match="col65">
+    <xsl:if test="string-length(.)>0">
+      <pbcoreIdentifier>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="source">Institution</xsl:attribute>
         <xsl:attribute name="annotation">
           <xsl:value-of select="../../row[1]/*[$column]"/>
         </xsl:attribute>
