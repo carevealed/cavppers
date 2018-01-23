@@ -54,10 +54,10 @@ _getmd5(){
   if [[ -f "${FILE}.md5" ]] ; then
     MD5=$(head -n 1 "${FILE}.md5")
     if [[ -n "${MD5}" ]] ; then
-      xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
         --append "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -type elem -n instantiationIdentifier -v "${MD5}" \
           "${MI_TMP}"
-      xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
         --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "source" -v "California Revealed" \
         --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "version" -v "MD5" \
         --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "annotation" -v "checksum" \
@@ -86,14 +86,14 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
   PACKAGENAME=$(basename "${PACKAGE}")
   PACKAGE_INVENTORY_XML=$(_maketemp)
   echo "Examining package (${PACKAGE}) and making a temp xml for it at ${PACKAGE_INVENTORY_XML}"
-  if [[ $(xml sel -t -m "/csv/row[col2='${PACKAGENAME}']" -c . "${INVENTORY_XML}") ]] ; then
+  if [[ $(xmlstarlet sel -t -m "/csv/row[col2='${PACKAGENAME}']" -c . "${INVENTORY_XML}") ]] ; then
     echo "Found ${PACKAGENAME} in the inventory."
     unset MI_LIST
     while read FILE ; do
       echo "Analyzing $FILE"
       MI_TMP=$(_maketemp)
       mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
-      xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
+      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
       _getmd5 "$FILE"
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
@@ -102,13 +102,13 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
       echo "Analyzing $FILE"
       MI_TMP=$(_maketemp)
       mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
-      xml edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
+      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
       _getmd5 "$FILE"
       MI_LIST+="${MI_TMP}"
       MI_LIST+="+"
     done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
     echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST%?}"
-    xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations "${MI_LIST%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xml fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
+    xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations "${MI_LIST%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
   else
     echo "Did not find $PACKAGENAME in the inventory."
   fi
