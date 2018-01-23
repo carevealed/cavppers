@@ -32,7 +32,7 @@ _maketemp(){
 _make_inventory(){
   # find inventories
   INVENTORY_LIST=$(_maketemp)
-  find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" > "${INVENTORY_LIST}"
+  find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" ! -name ".*" > "${INVENTORY_LIST}"
 
   if [[ $(cat "${INVENTORY_LIST}" | awk 'END{print NR}') = "0" ]] ; then
     # if no inventories are found, complain and exit
