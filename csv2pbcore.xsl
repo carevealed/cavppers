@@ -11,9 +11,6 @@
       <xsl:attribute name="collectionSource">
         <xsl:value-of select="row[starts-with(col2,$select)]/col6"/>
       </xsl:attribute>
-      <xsl:attribute name="collectionSourceAGAIN">
-        <xsl:value-of select="row[starts-with(col2,$select)]/col65"/>
-      </xsl:attribute>
       <xsl:apply-templates select="row[starts-with(col2,$select)]"/>
     </pbcoreCollection>
   </xsl:template>
@@ -23,7 +20,7 @@
       All values listed below must also be referenced by a function below.-->
       <xsl:apply-templates select="col7"/><!-- Asset Type -->
       <xsl:apply-templates select="col22|col23"/><!-- Dates -->
-      <xsl:apply-templates select="col1|col2|col3|col4|col69"/><!-- identifiers -->
+      <xsl:apply-templates select="col1|col2|col3|col4|col65|col69"/><!-- identifiers -->
       <xsl:apply-templates select="col10|col11|col12"/><!-- titles -->
       <xsl:apply-templates select="col42|col43"/><!-- subjects -->
       <xsl:apply-templates select="col13|col67|col68"/><!-- descriptions -->
@@ -34,7 +31,7 @@
       <xsl:apply-templates select="col24|col60|col61|col62|col63|col64"/><!-- rights -->
 
       <pbcoreInstantiation>
-        <xsl:apply-templates select="XXX" mode="instantiation"/><!-- id -->
+        <xsl:apply-templates select="col2" mode="instantiation"/><!-- id -->
         <xsl:apply-templates select="XXX" mode="instantiation"/><!-- date -->
         <xsl:apply-templates select="col25"/><!-- physical -->
         <xsl:apply-templates select="col6"/><!-- location -->
@@ -163,6 +160,18 @@
       </pbcoreIdentifier>
     </xsl:if>
   </xsl:template>
+  <xsl:template name="identifier-institution-url" match="col65">
+    <xsl:if test="string-length(.)>0">
+      <pbcoreIdentifier>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="source">Institution</xsl:attribute>
+        <xsl:attribute name="annotation">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </pbcoreIdentifier>
+    </xsl:if>
+  </xsl:template>
   <xsl:template name="identifier-cdl" match="col69">
     <xsl:if test="string-length(.)>0">
       <pbcoreIdentifier>
@@ -173,18 +182,6 @@
         </xsl:attribute>
         <xsl:value-of select="."/>
       </pbcoreIdentifier>
-    </xsl:if>
-  </xsl:template>
-  <xsl:template name="inst-identifier-cavpp" match="XXX" mode="instantiation">
-    <xsl:if test="string-length(.)>0">
-      <instantiationIdentifier>
-        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
-        <xsl:attribute name="source">CAVPP</xsl:attribute>
-        <xsl:attribute name="annotation">
-          <xsl:value-of select="../../row[1]/*[$column]"/>
-        </xsl:attribute>
-        <xsl:value-of select="."/>
-      </instantiationIdentifier>
     </xsl:if>
   </xsl:template>
   <!-- titles -->
@@ -324,6 +321,18 @@
     </xsl:if>
   </xsl:template>
   <!-- instantiation stuff -->
+  <xsl:template name="inst-identifier-cavpp" match="col2" mode="instantiation">
+    <xsl:if test="string-length(.)>0">
+      <instantiationIdentifier>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="source">CAVPP</xsl:attribute>
+        <xsl:attribute name="annotation">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </instantiationIdentifier>
+    </xsl:if>
+  </xsl:template>
   <xsl:template name="instantiationPhysical" match="col25">
     <xsl:if test="string-length(.)>0">
       <instantiationPhysical>
