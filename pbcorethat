@@ -72,7 +72,7 @@ ANALYSIS_DIR="${1}"
 _checkdir "${ANALYSIS_DIR}"
 
 # find inventory and exit if it's not there.
-INVENTORY=$(find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" | head -n 1)
+INVENTORY=$(find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" ! -name ".*" | head -n 1)
 if [[ ! -f "${INVENTORY}" ]] ; then
     echo "Error: no inventory files were found in $(basename "${ANALYSIS_DIR}")"
     exit 1
