@@ -30,6 +30,7 @@
       <xsl:apply-templates select="col39|col40"/><!-- publisher -->
       <xsl:apply-templates select="col24|col60|col61|col62|col63|col64"/><!-- rights -->
 
+      <xsl:comment>Original Asset</xsl:comment>
       <pbcoreInstantiation>
         <xsl:apply-templates select="col2" mode="instantiation"/><!-- id -->
         <xsl:apply-templates select="XXX" mode="instantiation"/><!-- date -->
@@ -42,7 +43,14 @@
         <xsl:apply-templates select="col41"/><!-- langauge -->
         <xsl:apply-templates select="col26"/><!-- annotation extent -->
       </pbcoreInstantiation>
-      <xsl:for-each select="str:tokenize($instantiations,'+')">
+      <xsl:comment>Preservation Master</xsl:comment>
+      <xsl:for-each select="str:tokenize($instantiations_prsv,'+')">
+        <pbcoreInstantiation>
+          <xsl:copy-of select="document(normalize-space(.))/p:pbcoreInstantiationDocument/node()"/>
+        </pbcoreInstantiation>
+      </xsl:for-each>
+      <xsl:comment>Access Copy</xsl:comment>
+      <xsl:for-each select="str:tokenize($instantiations_access,'+')">
         <pbcoreInstantiation>
           <xsl:copy-of select="document(normalize-space(.))/p:pbcoreInstantiationDocument/node()"/>
         </pbcoreInstantiation>
