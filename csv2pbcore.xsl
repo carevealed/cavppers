@@ -8,6 +8,12 @@
                       collectionDate="for institutional reference"
                       collectionTitle=""
                       collectionRef="">
+      <xsl:attribute name="collectionTitle">
+        <xsl:value-of select="row[starts-with(col2,$select)]/col47"/>
+      </xsl:attribute>
+      <xsl:attribute name="collectionRef">
+        <xsl:value-of select="row[starts-with(col2,$select)]/col48"/>
+      </xsl:attribute>
       <xsl:attribute name="collectionSource">
         <xsl:value-of select="row[starts-with(col2,$select)]/col6"/>
       </xsl:attribute>
