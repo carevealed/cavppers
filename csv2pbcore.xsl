@@ -8,6 +8,12 @@
                       collectionDate="for institutional reference"
                       collectionTitle=""
                       collectionRef="">
+      <xsl:attribute name="collectionTitle">
+        <xsl:value-of select="row[starts-with(col2,$select)]/col47"/>
+      </xsl:attribute>
+      <xsl:attribute name="collectionRef">
+        <xsl:value-of select="row[starts-with(col2,$select)]/col48"/>
+      </xsl:attribute>
       <xsl:attribute name="collectionSource">
         <xsl:value-of select="row[starts-with(col2,$select)]/col6"/>
       </xsl:attribute>
@@ -24,12 +30,13 @@
       <xsl:apply-templates select="col10|col11|col12"/><!-- titles -->
       <xsl:apply-templates select="col42|col43"/><!-- subjects -->
       <xsl:apply-templates select="col13|col67|col68"/><!-- descriptions -->
-      <xsl:apply-templates select="col45"/><!-- genre -->
+      <xsl:apply-templates select="col44"/><!-- genre -->
       <xsl:apply-templates select="col15|col16|col17|col18|col19|col20"/><!-- creator -->
       <xsl:apply-templates select="col30|col31|col32|col33|col34|col35|col36|col37|col38"/><!-- contributor -->
       <xsl:apply-templates select="col39|col40"/><!-- publisher -->
       <xsl:apply-templates select="col24|col60|col61|col62|col63|col64"/><!-- rights -->
 
+      <xsl:comment>Original Asset</xsl:comment>
       <pbcoreInstantiation>
         <xsl:apply-templates select="col2" mode="instantiation"/><!-- id -->
         <xsl:apply-templates select="XXX" mode="instantiation"/><!-- date -->
@@ -42,7 +49,14 @@
         <xsl:apply-templates select="col41"/><!-- langauge -->
         <xsl:apply-templates select="col26"/><!-- annotation extent -->
       </pbcoreInstantiation>
-      <xsl:for-each select="str:tokenize($instantiations,'+')">
+      <xsl:comment>Preservation Master</xsl:comment>
+      <xsl:for-each select="str:tokenize($instantiations_prsv,'+')">
+        <pbcoreInstantiation>
+          <xsl:copy-of select="document(normalize-space(.))/p:pbcoreInstantiationDocument/node()"/>
+        </pbcoreInstantiation>
+      </xsl:for-each>
+      <xsl:comment>Access Copy</xsl:comment>
+      <xsl:for-each select="str:tokenize($instantiations_access,'+')">
         <pbcoreInstantiation>
           <xsl:copy-of select="document(normalize-space(.))/p:pbcoreInstantiationDocument/node()"/>
         </pbcoreInstantiation>
@@ -140,7 +154,7 @@
     <xsl:if test="string-length(.)>0">
       <pbcoreIdentifier>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
-        <xsl:attribute name="annotation">CAVPP</xsl:attribute>
+        <xsl:attribute name="annotation">California Revealed</xsl:attribute>
         <xsl:attribute name="source">
           <xsl:value-of select="../../row[1]/*[$column]"/>
         </xsl:attribute>
@@ -221,7 +235,7 @@
     </xsl:if>
   </xsl:template>
   <!-- genres -->
-  <xsl:template name="genre" match="col45">
+  <xsl:template name="genre" match="col44">
     <xsl:if test="string-length(.)>0">
       <pbcoreGenre>
         <xsl:attribute name="source">The Moving Image Genre-form Guide</xsl:attribute>
@@ -325,7 +339,7 @@
     <xsl:if test="string-length(.)>0">
       <instantiationIdentifier>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
-        <xsl:attribute name="source">CAVPP</xsl:attribute>
+        <xsl:attribute name="source">California Revealed</xsl:attribute>
         <xsl:attribute name="annotation">
           <xsl:value-of select="../../row[1]/*[$column]"/>
         </xsl:attribute>
@@ -389,7 +403,7 @@
           <extensionValue>
             <xsl:value-of select="."/>
           </extensionValue>
-          <extensionAuthorityUsed>CAVPP</extensionAuthorityUsed>
+          <extensionAuthorityUsed>California Revealed</extensionAuthorityUsed>
         </extensionWrap>
       </pbcoreExtension>
     </xsl:if>

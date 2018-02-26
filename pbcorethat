@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPTDIR="$(dirname "${0}")"
-PBCOREEXTENSION="_PBCore_draft"
+PBCOREEXTENSION="_PBCore"
 FILE_INSTANTIATIONLOCATION_VALUE="California Revealed Digital Repository"
 
 # very very basic instructions
@@ -51,17 +51,18 @@ fi
 
 _getmd5(){
   FILE="${1}"
+  TMP_FILE="${2}"
   if [[ -f "${FILE}.md5" ]] ; then
-    MD5=$(head -n 1 "${FILE}.md5")
+    MD5=$(grep -o -e "[0-9a-f]\{32\}" "${FILE}.md5" | head -n 1)
     if [[ -n "${MD5}" ]] ; then
       xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
         --append "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -type elem -n instantiationIdentifier -v "${MD5}" \
-          "${MI_TMP}"
+          "${TMP_FILE}"
       xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
         --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "source" -v "California Revealed" \
         --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "version" -v "MD5" \
         --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "annotation" -v "checksum" \
-        "${MI_TMP}"
+        "${TMP_FILE}"
     fi
   fi
 }
@@ -88,27 +89,27 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
   echo "Examining package (${PACKAGE}) and making a temp xml for it at ${PACKAGE_INVENTORY_XML}"
   if [[ $(xmlstarlet sel -t -m "/csv/row[col2='${PACKAGENAME}']" -c . "${INVENTORY_XML}") ]] ; then
     echo "Found ${PACKAGENAME} in the inventory."
-    unset MI_LIST
+    unset MI_LIST_PRSV MI_LIST_ACCESS
     while read FILE ; do
       echo "Analyzing $FILE"
-      MI_TMP=$(_maketemp)
-      mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
-      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
-      _getmd5 "$FILE"
-      MI_LIST+="${MI_TMP}"
-      MI_LIST+="+"
+      MI_TMP_PRSV=$(_maketemp)
+      mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP_PRSV}"
+      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP_PRSV}"
+      _getmd5 "$FILE" "${MI_TMP_PRSV}"
+      MI_LIST_PRSV+="${MI_TMP_PRSV}"
+      MI_LIST_PRSV+="+"
     done < <(find "${PACKAGE}" -type f -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
     while read FILE ; do
       echo "Analyzing $FILE"
-      MI_TMP=$(_maketemp)
-      mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
-      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
-      _getmd5 "$FILE"
-      MI_LIST+="${MI_TMP}"
-      MI_LIST+="+"
+      MI_TMP_ACCESS=$(_maketemp)
+      mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP_ACCESS}"
+      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP_ACCESS}"
+      _getmd5 "$FILE" "${MI_TMP_ACCESS}"
+      MI_LIST_ACCESS+="${MI_TMP_ACCESS}"
+      MI_LIST_ACCESS+="+"
     done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
-    echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST%?}"
-    xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations "${MI_LIST%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
+    echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
+    xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations_prsv "${MI_LIST_PRSV%?}" --stringparam instantiations_access "${MI_LIST_ACCESS%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
   else
     echo "Did not find $PACKAGENAME in the inventory."
   fi
