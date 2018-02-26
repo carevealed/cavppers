@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPTDIR="$(dirname "${0}")"
-PBCOREEXTENSION="_PBCore_draft"
+PBCOREEXTENSION="_PBCore"
 FILE_INSTANTIATIONLOCATION_VALUE="California Revealed Digital Repository"
 
 # very very basic instructions
