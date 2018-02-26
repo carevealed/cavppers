@@ -140,7 +140,7 @@
     <xsl:if test="string-length(.)>0">
       <pbcoreIdentifier>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
-        <xsl:attribute name="annotation">CAVPP</xsl:attribute>
+        <xsl:attribute name="annotation">California Revealed</xsl:attribute>
         <xsl:attribute name="source">
           <xsl:value-of select="../../row[1]/*[$column]"/>
         </xsl:attribute>
@@ -325,7 +325,7 @@
     <xsl:if test="string-length(.)>0">
       <instantiationIdentifier>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
-        <xsl:attribute name="source">CAVPP</xsl:attribute>
+        <xsl:attribute name="source">California Revealed</xsl:attribute>
         <xsl:attribute name="annotation">
           <xsl:value-of select="../../row[1]/*[$column]"/>
         </xsl:attribute>
@@ -389,7 +389,7 @@
           <extensionValue>
             <xsl:value-of select="."/>
           </extensionValue>
-          <extensionAuthorityUsed>CAVPP</extensionAuthorityUsed>
+          <extensionAuthorityUsed>California Revealed</extensionAuthorityUsed>
         </extensionWrap>
       </pbcoreExtension>
     </xsl:if>
