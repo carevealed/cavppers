@@ -82,6 +82,15 @@ else
     csvprintf -x -f "$INVENTORY" > "$INVENTORY_XML"
 fi
 
+_get_mediainfo(){
+    FILE="${1}"
+    echo "Analyzing $FILE"
+    MI_TMP=$(_maketemp)
+    mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP}"
+    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP}"
+    _getmd5 "$FILE" "${MI_TMP}"
+}
+
 # find packages and make some metadata of them
 find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read PACKAGE ; do
   PACKAGENAME=$(basename "${PACKAGE}")
@@ -91,21 +100,13 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
     echo "Found ${PACKAGENAME} in the inventory."
     unset MI_LIST_PRSV MI_LIST_ACCESS
     while read FILE ; do
-      echo "Analyzing $FILE"
-      MI_TMP_PRSV=$(_maketemp)
-      mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP_PRSV}"
-      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP_PRSV}"
-      _getmd5 "$FILE" "${MI_TMP_PRSV}"
-      MI_LIST_PRSV+="${MI_TMP_PRSV}"
+      _get_mediainfo "$FILE"
+      MI_LIST_PRSV+="${MI_TMP}"
       MI_LIST_PRSV+="+"
     done < <(find "${PACKAGE}" -type f -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
     while read FILE ; do
-      echo "Analyzing $FILE"
-      MI_TMP_ACCESS=$(_maketemp)
-      mediainfo --inform=PBCore2 "${FILE}" > "${MI_TMP_ACCESS}"
-      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" -u //p:instantiationLocation -v "${FILE_INSTANTIATIONLOCATION_VALUE}" "${MI_TMP_ACCESS}"
-      _getmd5 "$FILE" "${MI_TMP_ACCESS}"
-      MI_LIST_ACCESS+="${MI_TMP_ACCESS}"
+      _get_mediainfo "$FILE"
+      MI_LIST_ACCESS+="${MI_TMP}"
       MI_LIST_ACCESS+="+"
     done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
     echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
