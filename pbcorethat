@@ -100,15 +100,15 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
     echo "Found ${PACKAGENAME} in the inventory."
     unset MI_LIST_PRSV MI_LIST_ACCESS
     while read FILE ; do
-      _get_mediainfo "$FILE"
-      MI_LIST_PRSV+="${MI_TMP}"
-      MI_LIST_PRSV+="+"
-    done < <(find "${PACKAGE}" -type f -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
-    while read FILE ; do
-      _get_mediainfo "$FILE"
-      MI_LIST_ACCESS+="${MI_TMP}"
-      MI_LIST_ACCESS+="+"
-    done < <(find "${PACKAGE}" -type f ! -name '*prsv*' ! -name '.*' ! -name '*.xml' ! -name '*.md5')
+        _get_mediainfo "$FILE"
+        if [[ "$FILE" = *"prsv"* ]]; then
+            MI_LIST_PRSV+="${MI_TMP}"
+            MI_LIST_PRSV+="+"
+        else
+            MI_LIST_ACCESS+="${MI_TMP}"
+            MI_LIST_ACCESS+="+"
+        fi
+    done < <(find "${PACKAGE}" -type f ! -name '.*' ! -name '*.xml' ! -name '*.md5')
     echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
     xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations_prsv "${MI_LIST_PRSV%?}" --stringparam instantiations_access "${MI_LIST_ACCESS%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
   else
