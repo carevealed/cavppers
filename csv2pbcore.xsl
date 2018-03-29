@@ -49,13 +49,17 @@
         <xsl:apply-templates select="col41"/><!-- langauge -->
         <xsl:apply-templates select="col26"/><!-- annotation extent -->
       </pbcoreInstantiation>
-      <xsl:comment>Preservation Master</xsl:comment>
+      <xsl:if test="$instantiations_prsv">
+        <xsl:comment>Preservation Master</xsl:comment>
+      </xsl:if>
       <xsl:for-each select="str:tokenize($instantiations_prsv,'+')">
         <pbcoreInstantiation>
           <xsl:copy-of select="document(normalize-space(.))/p:pbcoreInstantiationDocument/node()"/>
         </pbcoreInstantiation>
       </xsl:for-each>
-      <xsl:comment>Access Copy</xsl:comment>
+      <xsl:if test="$instantiations_access">
+        <xsl:comment>Access Copy</xsl:comment>
+      </xsl:if>
       <xsl:for-each select="str:tokenize($instantiations_access,'+')">
         <pbcoreInstantiation>
           <xsl:copy-of select="document(normalize-space(.))/p:pbcoreInstantiationDocument/node()"/>
