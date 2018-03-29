@@ -99,9 +99,31 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
   if [[ $(xmlstarlet sel -t -m "/csv/row[col2='${PACKAGENAME}']" -c . "${INVENTORY_XML}") ]] ; then
     echo "Found ${PACKAGENAME} in the inventory."
     unset MI_LIST_PRSV MI_LIST_ACCESS
+    rm -v "/tmp/pbcorethat_"*
     while read FILE ; do
         _get_mediainfo "$FILE"
-        if [[ "$FILE" = *"prsv"* ]]; then
+        if [[ "$FILE" = *_t[0-9][0-9]_* ]]; then
+            BASENAME=$(basename "${FILE}")
+            FILE_BASE=$(echo "${BASENAME%%_t[0-9][0-9]_*}")
+            PART_LABEL=$(echo "$FILE" | grep -o "_t[0-9][0-9]_")
+            PART_LABEL_S=$(echo "$FILE" | grep -o "_t[0-9][0-9]")
+            PART_IDENTIFIER="${FILE_BASE}${PART_LABEL_S}"
+            echo "Found that $FILE is a part of $PART_LABEL"
+            PART_XML="/tmp/pbcorethat_${PART_LABEL}.xml"
+            if [[ ! -f "$PART_XML" ]] ; then
+                echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
+                xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    --subnode "/p:pbcorePart" --type elem -n "pbcoreIdentifier" -v "${PART_IDENTIFIER}" "$PART_XML"
+                xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "source" -v "California Revealed" "$PART_XML"
+                xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "annotation" -v "Object Identifier" "$PART_XML"
+                MI_PARTS+="$PART_XML"
+                MI_PARTS+="+"
+            fi
+            xsltproc --stringparam instantiationpart "${MI_TMP}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
+            mv "${PART_XML}.new.xml" "$PART_XML"
+        elif [[ "$FILE" = *"prsv"* ]]; then
             MI_LIST_PRSV+="${MI_TMP}"
             MI_LIST_PRSV+="+"
         else
@@ -110,7 +132,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
         fi
     done < <(find "${PACKAGE}" -type f ! -name '.*' ! -name '*.xml' ! -name '*.md5')
     echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
-    xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations_prsv "${MI_LIST_PRSV%?}" --stringparam instantiations_access "${MI_LIST_ACCESS%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
+    xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations_parts "${MI_PARTS%?}" --stringparam instantiations_prsv "${MI_LIST_PRSV%?}" --stringparam instantiations_access "${MI_LIST_ACCESS%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
   else
     echo "Did not find $PACKAGENAME in the inventory."
   fi

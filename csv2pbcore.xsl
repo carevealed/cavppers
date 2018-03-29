@@ -36,6 +36,11 @@
       <xsl:apply-templates select="col39|col40"/><!-- publisher -->
       <xsl:apply-templates select="col24|col60|col61|col62|col63|col64"/><!-- rights -->
 
+      <xsl:variable name="part-description">
+        <xsl:apply-templates select="col10|col11|col12" mode="part"/><!-- titles -->
+        <xsl:apply-templates select="col13|col67|col68" mode="part"/><!-- descriptions -->
+      </xsl:variable>
+
       <xsl:comment>Original Asset</xsl:comment>
       <pbcoreInstantiation>
         <xsl:apply-templates select="col2" mode="instantiation"/><!-- id -->
@@ -64,6 +69,27 @@
         <pbcoreInstantiation>
           <xsl:copy-of select="document(normalize-space(.))/p:pbcoreInstantiationDocument/node()"/>
         </pbcoreInstantiation>
+      </xsl:for-each>
+      <!-- parts -->
+      <xsl:if test="$instantiations_parts">
+        <xsl:comment>Parts</xsl:comment>
+      </xsl:if>
+      <xsl:for-each select="str:tokenize($instantiations_parts,'+')">
+        <pbcorePart>
+          <xsl:copy-of select="document(normalize-space(.))/p:pbcorePart/p:pbcoreIdentifier"/>
+          <xsl:copy-of select="$part-description"/>
+          <xsl:for-each select="document(normalize-space(.))/p:pbcorePart/p:pbcoreInstantiation">
+            <xsl:choose>
+              <xsl:when test="contains(./p:instantiationIdentifier,'prsv')">
+                <xsl:comment>Preservation Master</xsl:comment>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:comment>Access Copy</xsl:comment>
+              </xsl:otherwise>
+            </xsl:choose>
+            <xsl:copy-of select="."/>
+          </xsl:for-each>
+        </pbcorePart>
       </xsl:for-each>
       <!-- extensions -->
       <xsl:apply-templates select="col5|col21"/><!-- extension -->
@@ -178,6 +204,18 @@
       </pbcoreIdentifier>
     </xsl:if>
   </xsl:template>
+  <xsl:template name="identifier-cavpp-part" match="col2" mode="part">
+    <xsl:if test="string-length(.)>0">
+      <pbcoreIdentifier>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="annotation">California Revealed</xsl:attribute>
+        <xsl:attribute name="source">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </pbcoreIdentifier>
+    </xsl:if>
+  </xsl:template>
   <xsl:template name="identifier-institution-url" match="col65">
     <xsl:if test="string-length(.)>0">
       <pbcoreIdentifier>
@@ -214,6 +252,17 @@
       </pbcoreTitle>
     </xsl:if>
   </xsl:template>
+  <xsl:template name="title-part" match="col10|col11|col12" mode="part">
+    <xsl:if test="string-length(.)>0">
+      <pbcoreTitle>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="titleType">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </pbcoreTitle>
+    </xsl:if>
+  </xsl:template>
   <!-- subjects -->
   <xsl:template name="subject" match="col42|col43">
     <xsl:if test="string-length(.)>0">
@@ -228,6 +277,17 @@
   </xsl:template>
   <!-- descriptions -->
   <xsl:template name="description" match="col13|col67|col68">
+    <xsl:if test="string-length(.)>0">
+      <pbcoreDescription>
+        <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+        <xsl:attribute name="descriptionType">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </pbcoreDescription>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template name="description-part" match="col13|col67|col68" mode="part">
     <xsl:if test="string-length(.)>0">
       <pbcoreDescription>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
