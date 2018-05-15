@@ -111,7 +111,6 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
         PART_IDENTIFIER="${FILE_BASE}${PART_LABEL_S}"
         PART_XML="/tmp/pbcorethat_${PART_LABEL}.xml"
         if [[ "$FILE" = *_[prt][0-9][0-9]_a_* ]]; then
-          INST_PART_IDENTIFIER=$(echo "${BASENAME%.*}" | sed "s/_a_/_/g")
           echo "$FILE IS AN INSTANTIATION PART of $PART_LABEL_S"
           INST_PART_XML=$(_maketemp)
 
@@ -126,7 +125,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
 
           echo "<pbcoreInstantiationDocument xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$INST_PART_XML"
           xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-              --subnode "/p:pbcoreInstantiationDocument" --type elem -n "instantiationIdentifier" -v "${INST_PART_IDENTIFIER}" "$INST_PART_XML"
+              --subnode "/p:pbcoreInstantiationDocument" --type elem -n "instantiationIdentifier" -v "$(echo "${BASENAME%.*}" | sed "s/_a_/_/g")" "$INST_PART_XML"
           xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
               --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier" -t attr -n "source" -v "California Revealed" "$INST_PART_XML"
           xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
