@@ -5,8 +5,8 @@ FILE_INSTANTIATIONLOCATION_VALUE="California Revealed Digital Repository"
 
 # very very basic instructions
 _usage(){
-  echo "Provide this script with a folder to search for metadata and files."
-  exit
+    echo "Provide this script with a folder to search for metadata and files."
+    exit
 }
 
 # a function to check if a directory exists and if not then exit
@@ -30,41 +30,41 @@ _maketemp(){
 
 # This finds all the csvs into the folder to be analyzed and strings them together and makes an xml representation of that.
 _make_inventory(){
-  # find inventories
-  INVENTORY_LIST=$(_maketemp)
-  find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" ! -name ".*" > "${INVENTORY_LIST}"
+    # find inventories
+    INVENTORY_LIST=$(_maketemp)
+    find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" ! -name ".*" > "${INVENTORY_LIST}"
 
-  if [[ $(cat "${INVENTORY_LIST}" | awk 'END{print NR}') = "0" ]] ; then
-    # if no inventories are found, complain and exit
-    echo "Error: no inventory files were found in $(basename "${INVENTORY_LIST}")"
-    exit
-  else
-    INVENTORY_CAT=$(_maketemp)
-    cat "${ANALYSIS_DIR}"/*.csv | csvprintf -x -f - > "${INVENTORY_CAT}"
-  fi
+    if [[ $(cat "${INVENTORY_LIST}" | awk 'END{print NR}') = "0" ]] ; then
+        # if no inventories are found, complain and exit
+        echo "Error: no inventory files were found in $(basename "${INVENTORY_LIST}")"
+        exit
+    else
+        INVENTORY_CAT=$(_maketemp)
+        cat "${ANALYSIS_DIR}"/*.csv | csvprintf -x -f - > "${INVENTORY_CAT}"
+    fi
 }
 
 # if not arguments, then show the help stuff and exit
 if [ "${#}" = 0 ] ; then
-  _usage
+    _usage
 fi
 
 _getmd5(){
-  FILE="${1}"
-  TMP_FILE="${2}"
-  if [[ -f "${FILE}.md5" ]] ; then
-    MD5=$(grep -o -e "[0-9a-f]\{32\}" "${FILE}.md5" | head -n 1)
-    if [[ -n "${MD5}" ]] ; then
-      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-        --append "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -type elem -n instantiationIdentifier -v "${MD5}" \
-          "${TMP_FILE}"
-      xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-        --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "source" -v "California Revealed" \
-        --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "version" -v "MD5" \
-        --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "annotation" -v "checksum" \
-        "${TMP_FILE}"
+    FILE="${1}"
+    TMP_FILE="${2}"
+    if [[ -f "${FILE}.md5" ]] ; then
+        MD5=$(grep -o -e "[0-9a-f]\{32\}" "${FILE}.md5" | head -n 1)
+        if [[ -n "${MD5}" ]] ; then
+            xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                --append "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -type elem -n instantiationIdentifier -v "${MD5}" \
+                "${TMP_FILE}"
+            xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "source" -v "California Revealed" \
+                --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "version" -v "MD5" \
+                --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -t attr -n "annotation" -v "checksum" \
+                "${TMP_FILE}"
+        fi
     fi
-  fi
 }
 
 ANALYSIS_DIR="${1}"
@@ -94,87 +94,88 @@ _get_mediainfo(){
 
 # find packages and make some metadata of them
 find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read PACKAGE ; do
-  PACKAGENAME=$(basename "${PACKAGE}")
-  PACKAGE_INVENTORY_XML=$(_maketemp)
-  echo "Examining package (${PACKAGE}) and making a temp xml for it at ${PACKAGE_INVENTORY_XML}"
-  if [[ $(xmlstarlet sel -t -m "/csv/row[starts-with(col2,'${PACKAGENAME}')]" -c . "${INVENTORY_XML}") ]] ; then
-    OBJECT_ID=$(xmlstarlet sel -t -m "/csv/row[starts-with(col2,'${PACKAGENAME}')]" -v col2 "${INVENTORY_XML}")
-    echo "Found ${PACKAGENAME} in the inventory under this OBJECT_ID: ${OBJECT_ID}."
-    unset MI_LIST_PRSV MI_LIST_ACCESS MI_PARTS
-    rm -v "/tmp/pbcorethat_"*
-    while read FILE ; do
-        _get_mediainfo "$FILE"
-        BASENAME=$(basename "${FILE}")
-        FILE_BASE=$(echo "${BASENAME%%_[prt][0-9][0-9]_*}")
-        PART_LABEL=$(echo "$FILE" | grep -o "_[prt][0-9][0-9]_")
-        PART_LABEL_S=$(echo "$FILE" | grep -o "_[prt][0-9][0-9]")
-        PART_IDENTIFIER="${FILE_BASE}${PART_LABEL_S}"
-        PART_XML="/tmp/pbcorethat_${PART_LABEL}.xml"
-        if [[ "$FILE" = *_[prt][0-9][0-9]_a_* ]]; then
-          echo "$FILE IS AN INSTANTIATION PART of $PART_LABEL_S"
-          INST_PART_XML=$(_maketemp)
+    PACKAGENAME=$(basename "${PACKAGE}")
+    PACKAGE_INVENTORY_XML=$(_maketemp)
+    echo "Examining package (${PACKAGE}) and making a temp xml for it at ${PACKAGE_INVENTORY_XML}"
+    if [[ $(xmlstarlet sel -t -m "/csv/row[starts-with(col2,'${PACKAGENAME}')]" -c . "${INVENTORY_XML}") ]] ; then
+        OBJECT_ID=$(xmlstarlet sel -t -m "/csv/row[starts-with(col2,'${PACKAGENAME}')]" -v col2 "${INVENTORY_XML}")
+        echo "Found ${PACKAGENAME} in the inventory under this OBJECT_ID: ${OBJECT_ID}."
+        unset MI_LIST_PRSV MI_LIST_ACCESS MI_PARTS
+        rm -v "/tmp/pbcorethat_"*
+        while read FILE ; do
+            _get_mediainfo "$FILE"
+            BASENAME=$(basename "${FILE}")
+            FILE_BASE=$(echo "${BASENAME%%_[prt][0-9][0-9]_*}")
+            PART_LABEL=$(echo "$FILE" | grep -o "_[prt][0-9][0-9]_")
+            PART_LABEL_S=$(echo "$FILE" | grep -o "_[prt][0-9][0-9]")
+            PART_IDENTIFIER="${FILE_BASE}${PART_LABEL_S}"
+            PART_XML="/tmp/pbcorethat_${PART_LABEL}.xml"
 
-          B_FILE=$(echo "$FILE" | sed "s/_a_/_b_/g")
-          INST_PART_LIST="$MI_TMP"
-          INST_PART_LIST+="+"
-          if [[ -f "$B_FILE" ]] ; then
-            _get_mediainfo "$B_FILE"
-            INST_PART_LIST+="$MI_TMP"
-            INST_PART_LIST+="+"
-          fi
+            if [[ "$FILE" = *_[prt][0-9][0-9]_a_* ]]; then
+                echo "$FILE IS AN INSTANTIATION PART of $PART_LABEL_S"
+                INST_PART_XML=$(_maketemp)
 
-          echo "<pbcoreInstantiationDocument xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$INST_PART_XML"
-          xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-              --subnode "/p:pbcoreInstantiationDocument" --type elem -n "instantiationIdentifier" -v "$(echo "${BASENAME%.*}" | sed "s/_a_/_/g")" "$INST_PART_XML"
-          xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-              --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier" -t attr -n "source" -v "California Revealed" "$INST_PART_XML"
-          xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-              --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier" -t attr -n "annotation" -v "Object Identifier" "$INST_PART_XML"
-          xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-              --subnode "/p:pbcoreInstantiationDocument" --type elem -n "instantiationLocation" -v "California Revealed Digital Repository" "$INST_PART_XML"
-          xsltproc --stringparam instantiationpart "${INST_PART_LIST%?}" "${SCRIPTDIR}/insertinstantiationpart2instantiation.xsl" "$INST_PART_XML" | xmlstarlet fo > "${INST_PART_XML}.new.xml"
-          mv "${INST_PART_XML}.new.xml" "$INST_PART_XML"
+                B_FILE=$(echo "$FILE" | sed "s/_a_/_b_/g")
+                INST_PART_LIST="$MI_TMP"
+                INST_PART_LIST+="+"
+                if [[ -f "$B_FILE" ]] ; then
+                    _get_mediainfo "$B_FILE"
+                    INST_PART_LIST+="$MI_TMP"
+                    INST_PART_LIST+="+"
+                fi
 
-          if [[ ! -f "$PART_XML" ]] ; then
-              echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
-              xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                  --subnode "/p:pbcorePart" --type elem -n "pbcoreIdentifier" -v "${PART_IDENTIFIER}" "$PART_XML"
-              xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                  --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "source" -v "California Revealed" "$PART_XML"
-              xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                  --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "annotation" -v "Object Identifier" "$PART_XML"
-              MI_PARTS+="$PART_XML"
-              MI_PARTS+="+"
-          fi
-          xsltproc --stringparam instantiationpart "$INST_PART_XML" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
-          mv "${PART_XML}.new.xml" "$PART_XML"
-
-          elif [[ "$FILE" = *_[prt][0-9][0-9]_* ]]; then
-            echo "Found that $FILE is a part of $PART_LABEL"
-            if [[ ! -f "$PART_XML" ]] ; then
-                echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
+                echo "<pbcoreInstantiationDocument xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$INST_PART_XML"
                 xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    --subnode "/p:pbcoreInstantiationDocument" --type elem -n "instantiationIdentifier" -v "$(echo "${BASENAME%.*}" | sed "s/_a_/_/g")" "$INST_PART_XML"
+                xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier" -t attr -n "source" -v "California Revealed" "$INST_PART_XML"
+                xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    --insert "/p:pbcoreInstantiationDocument/p:instantiationIdentifier" -t attr -n "annotation" -v "Object Identifier" "$INST_PART_XML"
+                xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    --subnode "/p:pbcoreInstantiationDocument" --type elem -n "instantiationLocation" -v "California Revealed Digital Repository" "$INST_PART_XML"
+                xsltproc --stringparam instantiationpart "${INST_PART_LIST%?}" "${SCRIPTDIR}/insertinstantiationpart2instantiation.xsl" "$INST_PART_XML" | xmlstarlet fo > "${INST_PART_XML}.new.xml"
+                mv "${INST_PART_XML}.new.xml" "$INST_PART_XML"
+
+                if [[ ! -f "$PART_XML" ]] ; then
+                    echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
+                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                        --subnode "/p:pbcorePart" --type elem -n "pbcoreIdentifier" -v "${PART_IDENTIFIER}" "$PART_XML"
+                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                        --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "source" -v "California Revealed" "$PART_XML"
+                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                        --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "annotation" -v "Object Identifier" "$PART_XML"
+                    MI_PARTS+="$PART_XML"
+                    MI_PARTS+="+"
+                fi
+                xsltproc --stringparam instantiationpart "$INST_PART_XML" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
+                mv "${PART_XML}.new.xml" "$PART_XML"
+
+            elif [[ "$FILE" = *_[prt][0-9][0-9]_* ]]; then
+                echo "Found that $FILE is a part of $PART_LABEL"
+                if [[ ! -f "$PART_XML" ]] ; then
+                    echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
+                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
                     --subnode "/p:pbcorePart" --type elem -n "pbcoreIdentifier" -v "${PART_IDENTIFIER}" "$PART_XML"
-                xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
                     --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "source" -v "California Revealed" "$PART_XML"
-                xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
                     --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "annotation" -v "Object Identifier" "$PART_XML"
-                MI_PARTS+="$PART_XML"
-                MI_PARTS+="+"
+                    MI_PARTS+="$PART_XML"
+                    MI_PARTS+="+"
+                fi
+                xsltproc --stringparam instantiationpart "${MI_TMP}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
+                mv "${PART_XML}.new.xml" "$PART_XML"
+            elif [[ "$FILE" = *"prsv"* ]]; then
+                MI_LIST_PRSV+="${MI_TMP}"
+                MI_LIST_PRSV+="+"
+            else
+                MI_LIST_ACCESS+="${MI_TMP}"
+                MI_LIST_ACCESS+="+"
             fi
-            xsltproc --stringparam instantiationpart "${MI_TMP}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
-            mv "${PART_XML}.new.xml" "$PART_XML"
-        elif [[ "$FILE" = *"prsv"* ]]; then
-            MI_LIST_PRSV+="${MI_TMP}"
-            MI_LIST_PRSV+="+"
-        else
-            MI_LIST_ACCESS+="${MI_TMP}"
-            MI_LIST_ACCESS+="+"
-        fi
-    done < <(find "${PACKAGE}" -type f ! -name '.*' ! -name '*.xml' ! -name '*_b_*' ! -name '*.md5')
-    echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
-    xsltproc --stringparam select "${PACKAGENAME}" --stringparam pbcore_parts "${MI_PARTS%?}" --stringparam instantiations_prsv "${MI_LIST_PRSV%?}" --stringparam instantiations_access "${MI_LIST_ACCESS%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
-  else
-    echo "Did not find $PACKAGENAME in the inventory."
-  fi
+        done < <(find "${PACKAGE}" -type f ! -name '.*' ! -name '*.xml' ! -name '*_b_*' ! -name '*.md5')
+        echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
+        xsltproc --stringparam select "${PACKAGENAME}" --stringparam pbcore_parts "${MI_PARTS%?}" --stringparam instantiations_prsv "${MI_LIST_PRSV%?}" --stringparam instantiations_access "${MI_LIST_ACCESS%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
+    else
+        echo "Did not find $PACKAGENAME in the inventory."
+    fi
 done
