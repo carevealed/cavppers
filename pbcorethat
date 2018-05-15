@@ -97,8 +97,9 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
   PACKAGENAME=$(basename "${PACKAGE}")
   PACKAGE_INVENTORY_XML=$(_maketemp)
   echo "Examining package (${PACKAGE}) and making a temp xml for it at ${PACKAGE_INVENTORY_XML}"
-  if [[ $(xmlstarlet sel -t -m "/csv/row[col2='${PACKAGENAME}']" -c . "${INVENTORY_XML}") ]] ; then
-    echo "Found ${PACKAGENAME} in the inventory."
+  if [[ $(xmlstarlet sel -t -m "/csv/row[starts-with(col2,'${PACKAGENAME}')]" -c . "${INVENTORY_XML}") ]] ; then
+    OBJECT_ID=$(xmlstarlet sel -t -m "/csv/row[starts-with(col2,'${PACKAGENAME}')]" -v col2 "${INVENTORY_XML}")
+    echo "Found ${PACKAGENAME} in the inventory under this OBJECT_ID: ${OBJECT_ID}."
     unset MI_LIST_PRSV MI_LIST_ACCESS
     rm -v "/tmp/pbcorethat_"*
     while read FILE ; do
