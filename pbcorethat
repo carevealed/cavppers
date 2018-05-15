@@ -102,11 +102,11 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
     rm -v "/tmp/pbcorethat_"*
     while read FILE ; do
         _get_mediainfo "$FILE"
-        if [[ "$FILE" = *_t[0-9][0-9]_* ]]; then
+        if [[ "$FILE" = *_[prt][0-9][0-9]_* ]]; then
             BASENAME=$(basename "${FILE}")
-            FILE_BASE=$(echo "${BASENAME%%_t[0-9][0-9]_*}")
-            PART_LABEL=$(echo "$FILE" | grep -o "_t[0-9][0-9]_")
-            PART_LABEL_S=$(echo "$FILE" | grep -o "_t[0-9][0-9]")
+            FILE_BASE=$(echo "${BASENAME%%_[prt][0-9][0-9]_*}")
+            PART_LABEL=$(echo "$FILE" | grep -o "_[prt][0-9][0-9]_")
+            PART_LABEL_S=$(echo "$FILE" | grep -o "_[prt][0-9][0-9]")
             PART_IDENTIFIER="${FILE_BASE}${PART_LABEL_S}"
             echo "Found that $FILE is a part of $PART_LABEL"
             PART_XML="/tmp/pbcorethat_${PART_LABEL}.xml"
