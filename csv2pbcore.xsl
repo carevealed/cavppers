@@ -71,10 +71,10 @@
         </pbcoreInstantiation>
       </xsl:for-each>
       <!-- parts -->
-      <xsl:if test="$instantiations_parts">
+      <xsl:if test="$pbcore_parts">
         <xsl:comment>Parts</xsl:comment>
       </xsl:if>
-      <xsl:for-each select="str:tokenize($instantiations_parts,'+')">
+      <xsl:for-each select="str:tokenize($pbcore_parts,'+')">
         <pbcorePart>
           <xsl:copy-of select="document(normalize-space(.))/p:pbcorePart/p:pbcoreIdentifier"/>
           <xsl:copy-of select="$part-description"/>
