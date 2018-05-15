@@ -77,10 +77,9 @@ if [[ ! -f "${INVENTORY}" ]] ; then
     echo "Error: no inventory files were found in $(basename "${ANALYSIS_DIR}")"
     exit 1
 else
-    echo "Using $(basename "${INVENTORY}") as an inventory."
     INVENTORY_XML=$(_maketemp)
+    echo "Using $(basename "${INVENTORY}") as an inventory (xml version is at $INVENTORY_XML)."
     csvprintf -x -f "$INVENTORY" > "$INVENTORY_XML"
-    echo "temporary inventory xml is at $INVENTORY_XML"
 fi
 
 _get_mediainfo(){
@@ -112,7 +111,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
             PART_XML="/tmp/pbcorethat_${PART_LABEL}.xml"
 
             if [[ "$FILE" = *_[prt][0-9][0-9]_a_* ]]; then
-                echo "$FILE IS AN INSTANTIATION PART of $PART_LABEL_S"
+                echo "$BASENAME is part of a multipart instantiation within the pbcorePart of $PART_LABEL_S"
                 INST_PART_XML=$(_maketemp)
 
                 B_FILE=$(echo "$FILE" | sed "s/_a_/_b_/g")
@@ -151,7 +150,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 mv "${PART_XML}.new.xml" "$PART_XML"
 
             elif [[ "$FILE" = *_[prt][0-9][0-9]_* ]]; then
-                echo "Found that $FILE is a part of $PART_LABEL"
+                echo "$BASENAME is an instantiation within the pbcorePart of $PART_LABEL_S"
                 if [[ ! -f "$PART_XML" ]] ; then
                     echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
                     xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
@@ -173,7 +172,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 MI_LIST_ACCESS+="+"
             fi
         done < <(find "${PACKAGE}" -type f ! -name '.*' ! -name '*.xml' ! -name '*_b_*' ! -name '*.md5')
-        echo "The list of temporary mediainfo pbcore reports is: ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
+        echo "The list of temporary mediainfo pbcore reports is: ${MI_PARTS%?} and ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
         xsltproc --stringparam select "${PACKAGENAME}" --stringparam pbcore_parts "${MI_PARTS%?}" --stringparam instantiations_prsv "${MI_LIST_PRSV%?}" --stringparam instantiations_access "${MI_LIST_ACCESS%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
     else
         echo "Did not find $PACKAGENAME in the inventory."
