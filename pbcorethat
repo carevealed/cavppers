@@ -80,6 +80,7 @@ else
     echo "Using $(basename "${INVENTORY}") as an inventory."
     INVENTORY_XML=$(_maketemp)
     csvprintf -x -f "$INVENTORY" > "$INVENTORY_XML"
+    echo "temporary inventory xml is at $INVENTORY_XML"
 fi
 
 _get_mediainfo(){
