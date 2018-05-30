@@ -2,11 +2,11 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://www.pbcore.org/PBCore/PBCoreNamespace.html" xmlns:p="http://www.pbcore.org/PBCore/PBCoreNamespace.html" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:str="http://exslt.org/strings" version="1.0" extension-element-prefixes="xsi str p">
   <xsl:output encoding="UTF-8" method="xml" version="1.0" indent="yes"/>
   <xsl:template match="/csv">
-    <pbcoreInstantiation xmlns="http://www.pbcore.org/PBCore/PBCoreNamespace.html"
-                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    <pbcoreInstantiationDocument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xmlns="http://www.pbcore.org/PBCore/PBCoreNamespace.html"
                       xsi:schemaLocation="http://www.pbcore.org/PBCore/PBCoreNamespace.html https://raw.githubusercontent.com/WGBH/PBCore_2.1/master/pbcore-2.1.xsd">
       <xsl:apply-templates select="row[starts-with(col2,$select)]"/>
-    </pbcoreInstantiation>
+    </pbcoreInstantiationDocument>
   </xsl:template>
   <xsl:template match="row">
     <xsl:apply-templates select="col2" mode="instantiation"/><!-- id -->
@@ -72,7 +72,14 @@
         <xsl:attribute name="annotation">
           <xsl:value-of select="../../row[1]/*[$column]"/>
         </xsl:attribute>
-        <xsl:value-of select="."/>
+        <xsl:choose>
+          <xsl:when test="string-length($part_id)>0">
+            <xsl:value-of select="$part_id"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="."/>
+          </xsl:otherwise>
+        </xsl:choose>
       </instantiationIdentifier>
     </xsl:if>
   </xsl:template>
