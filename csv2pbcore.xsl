@@ -41,19 +41,14 @@
         <xsl:apply-templates select="col13|col67|col68" mode="part"/><!-- descriptions -->
       </xsl:variable>
 
-      <xsl:comment>Original Asset</xsl:comment>
-      <pbcoreInstantiation>
-        <xsl:apply-templates select="col2" mode="instantiation"/><!-- id -->
-        <xsl:apply-templates select="XXX" mode="instantiation"/><!-- date -->
-        <xsl:apply-templates select="col25"/><!-- physical -->
-        <xsl:apply-templates select="col6"/><!-- location -->
-        <xsl:apply-templates select="col8"/><!-- mediatype -->
-        <xsl:apply-templates select="col9"/><!-- generations -->
-        <xsl:apply-templates select="col29"/><!-- colors -->
-        <xsl:apply-templates select="col28"/><!-- tracks -->
-        <xsl:apply-templates select="col41"/><!-- langauge -->
-        <xsl:apply-templates select="col26"/><!-- annotation extent -->
-      </pbcoreInstantiation>
+      <xsl:if test="$instantiations_original">
+        <xsl:comment>Original Asset</xsl:comment>
+      </xsl:if>
+      <xsl:for-each select="str:tokenize($instantiations_original,'+')">
+        <pbcoreInstantiation>
+          <xsl:copy-of select="document(normalize-space(.))/p:pbcoreInstantiationDocument/node()"/>
+        </pbcoreInstantiation>
+      </xsl:for-each>
       <xsl:if test="$instantiations_prsv">
         <xsl:comment>Preservation Master</xsl:comment>
       </xsl:if>
@@ -80,6 +75,9 @@
           <xsl:copy-of select="$part-description"/>
           <xsl:for-each select="document(normalize-space(.))/p:pbcorePart/p:pbcoreInstantiation">
             <xsl:choose>
+                <xsl:when test="not(./p:instantiationPart/p:instantiationIdentifier[@source='File Name']) and not(./p:instantiationIdentifier[@source='File Name'])">
+                  <xsl:comment>Original Asset</xsl:comment>
+                </xsl:when>
               <xsl:when test="contains(./p:instantiationIdentifier,'prsv')">
                 <xsl:comment>Preservation Master</xsl:comment>
               </xsl:when>
