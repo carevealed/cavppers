@@ -115,7 +115,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 INST_PART_XML=$(_maketemp)
 
                 B_FILE=$(echo "$FILE" | sed "s/_a_/_b_/g")
-                INST_PART_LIST="$MI_TMP"
+                INST_PART_LIST="${MI_TMP}"
                 INST_PART_LIST+="+"
                 if [[ -f "$B_FILE" ]] ; then
                     _get_mediainfo "$B_FILE"
