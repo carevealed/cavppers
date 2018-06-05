@@ -67,6 +67,23 @@ _getmd5(){
     fi
 }
 
+_setup_original_instantiation(){
+    echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
+    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+        --subnode "/p:pbcorePart" --type elem -n "pbcoreIdentifier" -v "${PART_IDENTIFIER}" "$PART_XML"
+    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+        --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "source" -v "California Revealed" "$PART_XML"
+    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
+        --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "annotation" -v "Object Identifier" "$PART_XML"
+
+    if [[ ! -f "${MI_ORIGINAL_INST}" ]] ; then
+        # make instantiation for the part of the original object
+        xsltproc --stringparam select "${PACKAGENAME}" --stringparam part_id "$PART_IDENTIFIER" "${SCRIPTDIR}/csv2pbcore_instantiation.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${MI_ORIGINAL_INST}"
+        xsltproc --stringparam instantiationpart "${MI_ORIGINAL_INST}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
+        mv "${PART_XML}.new.xml" "$PART_XML"
+    fi
+}
+
 ANALYSIS_DIR="${1}"
 
 _checkdir "${ANALYSIS_DIR}"
@@ -138,21 +155,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 mv "${INST_PART_XML}.new.xml" "$INST_PART_XML"
 
                 if [[ ! -f "$PART_XML" ]] ; then
-                    echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
-                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                        --subnode "/p:pbcorePart" --type elem -n "pbcoreIdentifier" -v "${PART_IDENTIFIER}" "$PART_XML"
-                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                        --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "source" -v "California Revealed" "$PART_XML"
-                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                        --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "annotation" -v "Object Identifier" "$PART_XML"
-
-                    if [[ ! -f "${MI_ORIGINAL_INST}" ]] ; then
-                        # make instantiation for the part of the original object
-                        xsltproc --stringparam select "${PACKAGENAME}" --stringparam part_id "$PART_IDENTIFIER" "${SCRIPTDIR}/csv2pbcore_instantiation.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${MI_ORIGINAL_INST}"
-                        xsltproc --stringparam instantiationpart "${MI_ORIGINAL_INST}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
-                        mv "${PART_XML}.new.xml" "$PART_XML"
-                    fi
-
+                    _setup_original_instantiation
                     MI_PARTS+="$PART_XML"
                     MI_PARTS+="+"
                 fi
@@ -162,21 +165,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
             elif [[ "$FILE" = *_[prt][0-9][0-9]_* ]]; then
                 echo "$BASENAME is an instantiation within the pbcorePart of $PART_LABEL_S"
                 if [[ ! -f "$PART_XML" ]] ; then
-                    echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
-                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                    --subnode "/p:pbcorePart" --type elem -n "pbcoreIdentifier" -v "${PART_IDENTIFIER}" "$PART_XML"
-                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                    --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "source" -v "California Revealed" "$PART_XML"
-                    xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
-                    --insert "/p:pbcorePart/p:pbcoreIdentifier" -t attr -n "annotation" -v "Object Identifier" "$PART_XML"
-
-                    if [[ ! -f "${MI_ORIGINAL_INST}" ]] ; then
-                        # make instantiation for the part of the original object
-                        xsltproc --stringparam select "${PACKAGENAME}" --stringparam part_id "$PART_IDENTIFIER" "${SCRIPTDIR}/csv2pbcore_instantiation.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${MI_ORIGINAL_INST}"
-                        xsltproc --stringparam instantiationpart "${MI_ORIGINAL_INST}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
-                        mv "${PART_XML}.new.xml" "$PART_XML"
-                    fi
-
+                    _setup_original_instantiation
                     MI_PARTS+="$PART_XML"
                     MI_PARTS+="+"
                 fi
