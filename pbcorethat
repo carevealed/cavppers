@@ -104,7 +104,7 @@ _determine_instantiation_relation(){
     fi
 }
 
-_setup_original_instantiation(){
+_setup_original_instantiation_as_part(){
     echo "<pbcorePart xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"/>" > "$PART_XML"
     xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
         --subnode "/p:pbcorePart" --type elem -n "pbcoreIdentifier" -v "${PART_IDENTIFIER}" "$PART_XML"
@@ -194,7 +194,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 mv "${INST_PART_XML}.new.xml" "$INST_PART_XML"
 
                 if [[ ! -f "$PART_XML" ]] ; then
-                    _setup_original_instantiation
+                    _setup_original_instantiation_as_part
                     MI_PARTS+="$PART_XML"
                     MI_PARTS+="+"
                 fi
@@ -241,7 +241,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 _determine_instantiation_relation "$FILE" "${MI_TMP}" "$PART_IDENTIFIER"
                 echo "$BASENAME is an instantiation within the pbcorePart of $PART_LABEL_S"
                 if [[ ! -f "$PART_XML" ]] ; then
-                    _setup_original_instantiation
+                    _setup_original_instantiation_as_part
                     MI_PARTS+="$PART_XML"
                     MI_PARTS+="+"
                 fi
