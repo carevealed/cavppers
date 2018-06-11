@@ -6,7 +6,7 @@
       <xsl:apply-templates select="@*|node()"/>
     </xsl:copy>
   </xsl:template>
-  <xsl:template match="p:instantiationLocation">
+  <xsl:template match="p:instantiationLocation|p:instantiationRelation">
     <xsl:copy>
       <xsl:apply-templates select="@*|node()"/>
     </xsl:copy>
