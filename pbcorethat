@@ -202,6 +202,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 mv "${PART_XML}.new.xml" "$PART_XML"
 
             elif [[ "$FILE" = *_a_* ]]; then
+                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$PART_IDENTIFIER"
                 echo "$BASENAME is part of a multi sided instantiation"
                 INST_PART_XML=$(_maketemp)
 
@@ -210,6 +211,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 INST_PART_LIST+="+"
                 if [[ -f "$B_FILE" ]] ; then
                     _get_mediainfo "$B_FILE"
+                     _determine_instantiation_relation "$FILE" "${MI_TMP}" "$PART_IDENTIFIER"
                     INST_PART_LIST+="$MI_TMP"
                     INST_PART_LIST+="+"
                 fi
