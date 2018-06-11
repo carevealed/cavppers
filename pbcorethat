@@ -157,7 +157,6 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
         rm -v "/tmp/pbcorethat_"*
         while read FILE ; do
             _get_mediainfo "$FILE"
-            MI_ORIGINAL_INST=""
             BASENAME=$(basename "${FILE}")
             FILE_BASE=$(echo "${BASENAME%%_[prt][0-9][0-9]_*}")
             PART_LABEL=$(echo "$FILE" | grep -o "_[prt][0-9][0-9]_")
