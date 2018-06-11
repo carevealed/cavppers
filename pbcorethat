@@ -167,7 +167,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
             MI_ORIGINAL_INST="/tmp/pbcorethat_${PART_LABEL}original.xml"
 
             if [[ "$FILE" = *_[prt][0-9][0-9]_a_* ]]; then
-                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$PART_IDENTIFIER"
+                _determine_instantiation_relation "$FILE" "${MI_TMP}" "${PART_IDENTIFIER%.*}"
                 echo "$BASENAME is part of a multipart instantiation within the pbcorePart of $PART_LABEL_S"
                 INST_PART_XML=$(_maketemp)
 
@@ -176,7 +176,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 INST_PART_LIST+="+"
                 if [[ -f "$B_FILE" ]] ; then
                     _get_mediainfo "$B_FILE"
-                    _determine_instantiation_relation "$B_FILE" "${MI_TMP}" "$PART_IDENTIFIER"
+                    _determine_instantiation_relation "$B_FILE" "${MI_TMP}" "${PART_IDENTIFIER%.*}"
                     INST_PART_LIST+="$MI_TMP"
                     INST_PART_LIST+="+"
                 fi
@@ -202,7 +202,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 mv "${PART_XML}.new.xml" "$PART_XML"
 
             elif [[ "$FILE" = *_a_* ]]; then
-                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$PART_IDENTIFIER"
+                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$OBJECT_ID"
                 echo "$BASENAME is part of a multi sided instantiation"
                 INST_PART_XML=$(_maketemp)
 
@@ -211,7 +211,7 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 INST_PART_LIST+="+"
                 if [[ -f "$B_FILE" ]] ; then
                     _get_mediainfo "$B_FILE"
-                     _determine_instantiation_relation "$FILE" "${MI_TMP}" "$PART_IDENTIFIER"
+                     _determine_instantiation_relation "$FILE" "${MI_TMP}" "$OBJECT_ID"
                     INST_PART_LIST+="$MI_TMP"
                     INST_PART_LIST+="+"
                 fi
@@ -248,11 +248,11 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 xsltproc --stringparam instantiationpart "${MI_TMP}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
                 mv "${PART_XML}.new.xml" "$PART_XML"
             elif [[ "$FILE" = *"prsv"* ]]; then
-                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$PART_IDENTIFIER"
+                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$OBJECT_ID"
                 MI_LIST_PRSV+="${MI_TMP}"
                 MI_LIST_PRSV+="+"
             else
-                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$PART_IDENTIFIER"
+                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$OBJECT_ID"
                 MI_LIST_ACCESS+="${MI_TMP}"
                 MI_LIST_ACCESS+="+"
             fi
