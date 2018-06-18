@@ -87,18 +87,16 @@
         <pbcorePart>
           <xsl:copy-of select="document(normalize-space(.))/p:pbcorePart/p:pbcoreIdentifier"/>
           <xsl:copy-of select="$part-description"/>
-          <xsl:for-each select="document(normalize-space(.))/p:pbcorePart/p:pbcoreInstantiation">
-            <xsl:choose>
-                <xsl:when test="not(./p:instantiationPart/p:instantiationIdentifier[@source='File Name']) and not(./p:instantiationIdentifier[@source='File Name'])">
-                  <xsl:comment>Original Asset</xsl:comment>
-                </xsl:when>
-              <xsl:when test="contains(./p:instantiationIdentifier,'prsv')">
-                <xsl:comment>Preservation Master</xsl:comment>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:comment>Access Copy</xsl:comment>
-              </xsl:otherwise>
-            </xsl:choose>
+          <xsl:for-each select="document(normalize-space(.))/p:pbcorePart/p:pbcoreInstantiation[not(./p:instantiationPart/p:instantiationIdentifier[@source='File Name']) and not(./p:instantiationIdentifier[@source='File Name'])]">
+            <xsl:comment>Original Asset</xsl:comment>
+            <xsl:copy-of select="."/>
+          </xsl:for-each>
+          <xsl:for-each select="document(normalize-space(.))/p:pbcorePart/p:pbcoreInstantiation[./p:instantiationPart/p:instantiationIdentifier[@source='File Name'] or ./p:instantiationIdentifier[@source='File Name']][contains(./p:instantiationIdentifier,'prsv')]">
+            <xsl:comment>Preservation Master</xsl:comment>
+            <xsl:copy-of select="."/>
+          </xsl:for-each>
+          <xsl:for-each select="document(normalize-space(.))/p:pbcorePart/p:pbcoreInstantiation[./p:instantiationPart/p:instantiationIdentifier[@source='File Name'] or ./p:instantiationIdentifier[@source='File Name']][not(contains(./p:instantiationIdentifier,'prsv'))]">
+            <xsl:comment>Access Copy</xsl:comment>
             <xsl:copy-of select="."/>
           </xsl:for-each>
         </pbcorePart>
