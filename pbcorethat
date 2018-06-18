@@ -268,6 +268,9 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
             fi
         done < <(find "${PACKAGE}" -type f ! -name '.*' ! -name '*.xml' ! -name '*_b_*' ! -name '*.md5')
         echo "The list of temporary mediainfo pbcore reports is: ${MI_PARTS%?} and ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
+        if [[ ! -f "$MI_ORIGINAL_NONPART_INST" ]] ; then
+            MI_ORIGINAL_NONPART_INST=""
+        fi
         xsltproc --stringparam select "${PACKAGENAME}" --stringparam instantiations_original "$MI_ORIGINAL_NONPART_INST" --stringparam pbcore_parts "${MI_PARTS%?}" --stringparam instantiations_prsv "${MI_LIST_PRSV%?}" --stringparam instantiations_access "${MI_LIST_ACCESS%?}" "${SCRIPTDIR}/csv2pbcore.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${PACKAGE}/${PACKAGENAME}${PBCOREEXTENSION}.xml"
 
     else
