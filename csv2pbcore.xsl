@@ -5,9 +5,7 @@
     <pbcoreCollection xmlns="http://www.pbcore.org/PBCore/PBCoreNamespace.html"
                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                       xsi:schemaLocation="http://www.pbcore.org/PBCore/PBCoreNamespace.html https://raw.githubusercontent.com/WGBH/PBCore_2.1/master/pbcore-2.1.xsd"
-                      collectionDate="for institutional reference"
-                      collectionTitle=""
-                      collectionRef="">
+                      collectionDate="for institutional reference">
       <xsl:attribute name="collectionTitle">
         <xsl:value-of select="row[starts-with(col2,$select)]/col47"/>
       </xsl:attribute>
