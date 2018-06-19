@@ -18,7 +18,7 @@
     <xsl:apply-templates select="col29"/><!-- colors -->
     <xsl:apply-templates select="col28"/><!-- tracks -->
     <xsl:apply-templates select="col41"/><!-- langauge -->
-    <xsl:apply-templates select="col26"/><!-- annotation extent -->
+    <xsl:apply-templates select="col26|col66"/><!-- annotations -->
   </xsl:template>
   
   <!-- PBCORE TEMPLATES -->
@@ -52,7 +52,7 @@
       </instantiationLanguage>
     </xsl:if>
   </xsl:template>
-  <xsl:template name="instantiation-annotation-extant" match="col26">
+  <xsl:template name="instantiation-annotation-extant" match="col26|col66">
     <xsl:if test="string-length(.)>0">
       <instantiationAnnotation>
         <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
