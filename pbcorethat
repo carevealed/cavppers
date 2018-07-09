@@ -53,7 +53,7 @@ _getmd5(){
     FILE="${1}"
     TMP_FILE="${2}"
     if [[ -f "${FILE}.md5" ]] ; then
-        MD5=$(grep -o -e "[0-9a-f]\{32\}" "${FILE}.md5" | head -n 1)
+        MD5=$(grep -o -e "[0-9a-fA-F]\{32\}" "${FILE}.md5" | head -n 1)
         if [[ -n "${MD5}" ]] ; then
             xmlstarlet edit --inplace -N "p=http://www.pbcore.org/PBCore/PBCoreNamespace.html" \
                 --append "/p:pbcoreInstantiationDocument/p:instantiationIdentifier[last()]" -type elem -n instantiationIdentifier -v "${MD5}" \
