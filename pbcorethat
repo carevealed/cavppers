@@ -256,15 +256,16 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
                 fi
                 xsltproc --stringparam instantiationpart "${MI_TMP}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
                 mv "${PART_XML}.new.xml" "$PART_XML"
-            elif [[ "$FILE" = *"prsv"* ]]; then
-                _determine_instantiation_relation "$FILE" "${MI_TMP}" "$OBJECT_ID"
-                _setup_original_instantiation
-                MI_LIST_PRSV+="${MI_TMP}"
-                MI_LIST_PRSV+="+"
             else
                 _determine_instantiation_relation "$FILE" "${MI_TMP}" "$OBJECT_ID"
-                MI_LIST_ACCESS+="${MI_TMP}"
-                MI_LIST_ACCESS+="+"
+                echo "$BASENAME is an instantiation within the pbcorePart of $PART_LABEL_S"
+                if [[ ! -f "$PART_XML" ]] ; then
+                    _setup_original_instantiation_as_part
+                    MI_PARTS+="$PART_XML"
+                    MI_PARTS+="+"
+                fi
+                xsltproc --stringparam instantiationpart "${MI_TMP}" "${SCRIPTDIR}/insertinstantiation2pbcorepart.xsl" "$PART_XML" | xmlstarlet fo > "${PART_XML}.new.xml"
+                mv "${PART_XML}.new.xml" "$PART_XML"
             fi
         done < <(find "${PACKAGE}" -type f ! -name '.*' ! -name '*.xml' ! -name '*_b_*' ! -name '*.md5')
         echo "The list of temporary mediainfo pbcore reports is: ${MI_PARTS%?} and ${MI_LIST_PRSV%?} and ${MI_LIST_ACCESS%?}"
