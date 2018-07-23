@@ -118,36 +118,16 @@
   </xsl:template>
   <!-- Dates -->
   <xsl:template name="date_created" match="col22">
-    <xsl:choose>
-      <xsl:when test="string-length(.)=10">
-        <pbcoreAssetDate>
-          <xsl:attribute name="dateType">Created</xsl:attribute>
-          <xsl:value-of select="."/>
-        </pbcoreAssetDate>
-      </xsl:when>
-      <xsl:when test="string-length(substring(.,3,string-length(.)-3))>0">
-        <pbcoreAssetDate>
-          <xsl:attribute name="dateType">Created</xsl:attribute>
-          <xsl:value-of select="substring(.,3,string-length(.)-3)"/>
-        </pbcoreAssetDate>
-      </xsl:when>
-    </xsl:choose>
+    <pbcoreAssetDate>
+      <xsl:attribute name="dateType">Created</xsl:attribute>
+      <xsl:value-of select="."/>
+    </pbcoreAssetDate>
   </xsl:template>
   <xsl:template name="date_published" match="col23">
-    <xsl:choose>
-      <xsl:when test="string-length(.)=10">
-        <pbcoreAssetDate>
-          <xsl:attribute name="dateType">Published</xsl:attribute>
-          <xsl:value-of select="."/>
-        </pbcoreAssetDate>
-      </xsl:when>
-      <xsl:when test="string-length(substring(.,3,string-length(.)-3))>0">
-        <pbcoreAssetDate>
-          <xsl:attribute name="dateType">Published</xsl:attribute>
-          <xsl:value-of select="substring(.,3,string-length(.)-3)"/>
-        </pbcoreAssetDate>
-      </xsl:when>
-    </xsl:choose>
+    <pbcoreAssetDate>
+      <xsl:attribute name="dateType">Published</xsl:attribute>
+      <xsl:value-of select="."/>
+    </pbcoreAssetDate>
   </xsl:template>
   <xsl:template name="date-instantiation" match="XXX" mode="instantiation">
     <xsl:if test="string-length(.)>0">
@@ -396,17 +376,15 @@
   </xsl:template>
   <!-- rights with date cleanup thing -->
   <xsl:template name="rights-date" match="col62">
-    <xsl:if test="string-length(substring(.,3,string-length(.)-3))>0">
-      <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
-      <pbcoreRightsSummary>
-        <rightsSummary>
-          <xsl:attribute name="annotation">
-            <xsl:value-of select="../../row[1]/*[$column]"/>
-          </xsl:attribute>
-          <xsl:value-of select="substring(.,3,string-length(.)-3)"/>
-        </rightsSummary>
-      </pbcoreRightsSummary>
-    </xsl:if>
+    <xsl:variable name="column" select="count(preceding-sibling::*)+1"/>
+    <pbcoreRightsSummary>
+      <rightsSummary>
+        <xsl:attribute name="annotation">
+          <xsl:value-of select="../../row[1]/*[$column]"/>
+        </xsl:attribute>
+        <xsl:value-of select="."/>
+      </rightsSummary>
+    </pbcoreRightsSummary>
   </xsl:template>
   <!-- instantiation stuff -->
   <xsl:template name="inst-identifier-cavpp" match="col2" mode="instantiation">
