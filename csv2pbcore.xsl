@@ -36,6 +36,7 @@
         </xsl:otherwise>
       </xsl:choose>
       <xsl:apply-templates select="col44"/><!-- genre -->
+      <xsl:apply-templates select="col45|col46"/><!-- coverage -->
       <xsl:apply-templates select="col15|col16|col17|col18|col19|col20"/><!-- creator -->
       <xsl:apply-templates select="col30|col31|col32|col33|col34|col35|col36|col37|col38"/><!-- contributor -->
       <xsl:apply-templates select="col39|col40"/><!-- publisher -->
