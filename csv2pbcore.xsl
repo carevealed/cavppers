@@ -117,22 +117,26 @@
   </xsl:template>
   <!-- Dates -->
   <xsl:template name="date_created" match="col22">
-    <pbcoreAssetDate>
-      <xsl:attribute name="dateType">Created</xsl:attribute>
-      <xsl:value-of select="."/>
-    </pbcoreAssetDate>
+    <xsl:if test="string-length(translate(translate(.,'=',''),'\&quot;',''))>0">
+      <pbcoreAssetDate>
+        <xsl:attribute name="dateType">Created</xsl:attribute>
+        <xsl:value-of select="translate(translate(.,'=',''),'\&quot;','')"/>
+      </pbcoreAssetDate>
+    </xsl:if>
   </xsl:template>
   <xsl:template name="date_published" match="col23">
-    <pbcoreAssetDate>
-      <xsl:attribute name="dateType">Published</xsl:attribute>
-      <xsl:value-of select="."/>
-    </pbcoreAssetDate>
+    <xsl:if test="string-length(translate(translate(.,'=',''),'\&quot;',''))>0">
+      <pbcoreAssetDate>
+        <xsl:attribute name="dateType">Published</xsl:attribute>
+        <xsl:value-of select="translate(translate(.,'=',''),'\&quot;','')"/>
+      </pbcoreAssetDate>
+    </xsl:if>
   </xsl:template>
   <xsl:template name="date-instantiation" match="XXX" mode="instantiation">
-    <xsl:if test="string-length(.)>0">
+    <xsl:if test="string-length(translate(translate(.,'=',''),'\&quot;',''))>0">
       <instantiationDate>
         <xsl:attribute name="dateType">Created</xsl:attribute>
-        <xsl:value-of select="."/>
+        <xsl:value-of select="translate(translate(.,'=',''),'\&quot;','')"/>
       </instantiationDate>
     </xsl:if>
   </xsl:template>
