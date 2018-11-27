@@ -28,22 +28,6 @@ _maketemp(){
     fi
 }
 
-# This finds all the csvs into the folder to be analyzed and strings them together and makes an xml representation of that.
-_make_inventory(){
-    # find inventories
-    INVENTORY_LIST=$(_maketemp)
-    find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*.csv" ! -name ".*" > "${INVENTORY_LIST}"
-
-    if [[ $(cat "${INVENTORY_LIST}" | awk 'END{print NR}') = "0" ]] ; then
-        # if no inventories are found, complain and exit
-        echo "Error: no inventory files were found in $(basename "${INVENTORY_LIST}")"
-        exit
-    else
-        INVENTORY_CAT=$(_maketemp)
-        cat "${ANALYSIS_DIR}"/*.csv | csvprintf -x -f - > "${INVENTORY_CAT}"
-    fi
-}
-
 # if not arguments, then show the help stuff and exit
 if [ "${#}" = 0 ] ; then
     _usage
