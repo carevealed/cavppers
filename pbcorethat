@@ -105,14 +105,6 @@ _setup_original_instantiation_as_part(){
     fi
 }
 
-_setup_original_instantiation(){
-    if [[ ! -f "${MI_ORIGINAL_NONPART_INST}" ]] ; then
-        # make instantiation for the part of the original object
-        xsltproc --stringparam select "${PACKAGENAME}" --stringparam part_id "$PART_IDENTIFIER" "${SCRIPTDIR}/csv2pbcore_instantiation.xsl" "${INVENTORY_XML}" | xmlstarlet fo > "${MI_ORIGINAL_NONPART_INST}"
-        echo "the originl inst non part is ${MI_ORIGINAL_NONPART_INST}"
-    fi
-}
-
 ANALYSIS_DIR="${1}"
 
 _checkdir "${ANALYSIS_DIR}"
@@ -166,7 +158,6 @@ find "${ANALYSIS_DIR}" -maxdepth 1 -mindepth 1 -name "*_*" -type d | while read 
 
             if [[ "$FILE" = *_a_* ]]; then
                 _determine_instantiation_relation "$FILE" "${MI_TMP}" "${PART_IDENTIFIER%.*}"
-                _setup_original_instantiation
                 echo "$BASENAME is part of a multipart instantiation within the pbcorePart of $PART_LABEL_S"
                 INST_PART_XML=$(_maketemp)
 
